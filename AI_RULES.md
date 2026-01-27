@@ -58,10 +58,10 @@ Primary Light
 ## Neutrals
 
 Background
-#FFFFFF
+#F4F4F5
 
 Section Background
-#F8FAFC
+#FFFFFF
 
 Border
 #E5E7EB

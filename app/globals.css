@@ -5,7 +5,7 @@
   --color-primary-dark: #15803D;
   --color-primary-light: #DCFCE7;
   
-  --color-background: #FFFFFF;
+  --color-background: #F4F4F5;
   --color-section: #F8FAFC;
   --color-border-subtle: #E5E7EB;
   
@@ -29,7 +29,7 @@
 }
 
 :root {
-  --background: #F8FAFC;
+  --background: #F4F4F5;
   --foreground: #111827;
 }
 
