@@ -33,12 +33,10 @@ export function PropertyCard({
     <div className="bg-white rounded-2xl border border-border-subtle overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group flex flex-col h-full">
       {/* Image Container */}
       <div className="relative h-56 w-full overflow-hidden">
-        <Image 
-          src={image} 
+        <img 
+          src={`${image}?v=1`} 
           alt={title}
-          fill
-          unoptimized
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         
         {/* Badges */}
