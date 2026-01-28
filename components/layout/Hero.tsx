@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search, MapPin, Grid, Wallet, ChevronDown } from "lucide-react";
 import { Button } from "../ui/Button";
 
 export function Hero() {
+  const router = useRouter();
   const [searchState, setSearchState] = useState({
     city: "",
     size: "",
@@ -12,8 +14,11 @@ export function Hero() {
   });
 
   const handleSearch = () => {
-    console.log("Searching for:", searchState);
-    alert(`Searching for properties in ${searchState.city || 'all cities'} with size ${searchState.size || 'any'} and budget ${searchState.budget || 'any'}`);
+    // Navigate to /buy with params
+    const params = new URLSearchParams();
+    if (searchState.city) params.append("city", searchState.city);
+    if (searchState.budget) params.append("budget", searchState.budget);
+    router.push(`/buy?${params.toString()}`);
   };
 
   return (

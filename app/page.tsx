@@ -2,6 +2,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/layout/Hero";
 import { Hotspots } from "@/components/layout/Hotspots";
 import { FeaturedPlots } from "@/components/layout/FeaturedPlots";
+import { WhyChooseUs } from "@/components/layout/WhyChooseUs";
 import { PreferredAgents } from "@/components/layout/PreferredAgents";
 import { SellerBanner } from "@/components/layout/SellerBanner";
 import { Footer } from "@/components/layout/Footer";
@@ -30,6 +31,7 @@ export default function Home() {
       </section>
 
       <Hotspots />
+      <WhyChooseUs />
       <FeaturedPlots />
       <PreferredAgents />
       <SellerBanner />

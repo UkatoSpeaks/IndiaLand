@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { User } from "lucide-react";
+import { useState } from "react";
+import { User, Menu, X, ArrowRight } from "lucide-react";
 import { Button } from "../ui/Button";
 
 export function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-border-subtle">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -47,13 +49,13 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* Links - Rule: middle of layout */}
+        {/* Links - Desktop */}
         <nav className="hidden lg:flex items-center gap-8">
-          <Link href="/buy" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
+          <Link href="/buy" className="text-sm font-bold text-text-secondary hover:text-primary transition-colors">
             Buy Plots
           </Link>
-          <Link href="/sell" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
-            Sell Land
+          <Link href="/sell" className="text-sm font-bold text-text-secondary hover:text-primary transition-colors">
+            Sell
           </Link>
           <Link href="/valuation" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
             Land Valuation
@@ -63,16 +65,62 @@ export function Navbar() {
           </Link>
         </nav>
 
-        {/* CTAs - Rule: Post Property CTA | Profile */}
+        {/* CTAs */}
         <div className="flex items-center gap-4">
-          <Button variant="primary" size="md">
+          <Button variant="primary" size="md" className="hidden md:flex">
             Post Property
           </Button>
           <button className="flex items-center justify-center w-10 h-10 rounded-full bg-section border border-border-subtle text-text-secondary hover:text-primary hover:border-primary/30 transition-all">
             <User className="w-5 h-5" />
           </button>
+          
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="lg:hidden p-2 text-text-primary hover:text-primary transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-border-subtle shadow-xl animate-in slide-in-from-top-4 duration-300 z-50">
+          <div className="flex flex-col p-6 gap-4">
+            <Link 
+              href="/buy" 
+              className="text-xl font-bold text-text-primary hover:text-primary flex items-center justify-between"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Buy Plots <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link 
+              href="/sell" 
+              className="text-xl font-bold text-text-primary hover:text-primary flex items-center justify-between"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Sell <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link 
+              href="/valuation" 
+              className="text-lg font-semibold text-text-secondary hover:text-primary"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Land Valuation
+            </Link>
+            <Link 
+              href="/rera" 
+              className="text-lg font-semibold text-text-secondary hover:text-primary"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              RERA Guide
+            </Link>
+            <hr className="border-border-subtle my-2" />
+            <Button variant="primary" className="w-full h-12 rounded-xl font-black">Post Property</Button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
