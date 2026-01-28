@@ -12,13 +12,19 @@ import {
   CheckCircle2, 
   ArrowRight, 
   ArrowLeft,
+  ArrowDown,
   ShieldCheck,
   TrendingUp,
   Landmark,
   BadgeCheck,
   Upload,
   X,
-  Info
+  Info,
+  Quote,
+  Zap,
+  Award,
+  MessageCircle,
+  HelpCircle
 } from "lucide-react";
 
 type FormStep = 'basic' | 'location' | 'media' | 'legal' | 'success';
@@ -26,6 +32,7 @@ type FormStep = 'basic' | 'location' | 'media' | 'legal' | 'success';
 export default function SellPage() {
   const [step, setStep] = useState<FormStep>('basic');
   const [valuationExpanded, setValuationExpanded] = useState(false);
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   
   // Mock form state
@@ -133,6 +140,77 @@ export default function SellPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Market Insights Component - NEW */}
+            <div className="bg-white rounded-[40px] p-8 border border-border-subtle shadow-xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-black text-text-primary">Market Insights</h3>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="p-4 bg-section/50 rounded-2xl border border-border-subtle">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-[10px] font-black text-text-muted uppercase">Hot Keywords in HSR</span>
+                    <span className="text-[10px] font-black text-verified bg-verified/10 px-2 py-0.5 rounded-full">TRENDING</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {['A Khata', 'Corner Plot', 'Gated', 'Near Metro'].map(tag => (
+                      <span key={tag} className="text-[11px] font-bold text-text-primary bg-white px-2.5 py-1 rounded-lg border border-border-subtle">#{tag}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Recent Sales Nearby</p>
+                  {[
+                    { loc: "HSR Layout Sector 2", price: "₹1.4Cr", time: "2 days ago" },
+                    { loc: "HSR Layout Sector 7", price: "₹2.1Cr", time: "1 week ago" }
+                  ].map((sale, i) => (
+                    <div key={i} className="flex items-center justify-between group cursor-default">
+                      <div className="flex items-center gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-verified" />
+                        <span className="text-xs font-bold text-text-primary">{sale.loc}</span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-black text-text-primary">{sale.price}</p>
+                        <p className="text-[9px] font-bold text-text-muted uppercase">{sale.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Document Preparation Checklist - NEW */}
+            <div className="bg-section/30 rounded-[40px] p-8 border border-border-subtle border-dashed">
+              <h4 className="text-sm font-black text-text-primary mb-6 uppercase tracking-widest flex items-center gap-2">
+                <FileText className="w-4 h-4 text-primary" /> Required Documents
+              </h4>
+              <ul className="space-y-4">
+                {[
+                  "Mother Deed (30 years history)",
+                  "Latest Khata Certificate & Extract",
+                  "Encumbrance Certificate (EC)",
+                  "Current Year Tax Paid Receipts"
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <div className="mt-1 w-4 h-4 rounded border border-border-subtle bg-white flex items-center justify-center">
+                       <div className="w-2 h-2 rounded-sm bg-primary/20" />
+                    </div>
+                    <span className="text-xs font-bold text-text-secondary italic leading-snug">{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8 pt-6 border-t border-border-subtle/50">
+                 <p className="text-[11px] font-bold text-text-muted italic leading-relaxed">
+                   <Info className="w-3 h-3 inline mr-1 text-primary" /> 
+                   Don't have these? Our legal partners can help you procure them for a nominal fee.
+                 </p>
               </div>
             </div>
 
@@ -373,6 +451,126 @@ export default function SellPage() {
                   </Button>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* How It Works Section - NEW */}
+        <div className="mt-32">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-5xl font-black text-text-primary mb-4 italic">3 Steps to a <span className="text-primary">Clean Sale</span></h2>
+            <p className="text-text-secondary font-medium italic">We've refined the process to be as smooth as possible for landowners.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { 
+                icon: Plus, 
+                title: "List Your Plot", 
+                desc: "Upload photos and legal details in under 2 minutes using our guided wizard." 
+              },
+              { 
+                icon: ShieldCheck, 
+                title: "Get Verified", 
+                desc: "Our legal team performs a sanity check to make your listing 'Diamond Verified'." 
+              },
+              { 
+                icon: Zap, 
+                title: "Close Fast", 
+                desc: "Get matched with cash-ready buyers looking for land in your specific neighborhood." 
+              }
+            ].map((step, i) => (
+              <div key={i} className="bg-white p-10 rounded-[40px] border border-border-subtle shadow-xl hover:translate-y-[-8px] transition-all duration-500 relative group overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] -mr-10 -mt-10 group-hover:bg-primary/10 transition-all" />
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-8">
+                  <step.icon className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-black text-text-primary mb-4">{step.title}</h3>
+                <p className="text-sm font-medium text-text-secondary leading-relaxed italic">{step.desc}</p>
+                <div className="mt-8 text-6xl font-black text-primary/5 absolute bottom-6 right-8">0{i+1}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Global Reach / Success Section - NEW */}
+        <div className="mt-32 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="relative">
+            <div className="bg-primary rounded-[50px] p-12 text-white shadow-2xl relative z-10 overflow-hidden">
+              <Quote className="w-20 h-20 text-white/10 absolute -top-4 -left-4" />
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => <Award key={i} className="w-5 h-5 fill-white text-white" />)}
+              </div>
+              <p className="text-2xl md:text-3xl font-black italic leading-tight mb-8 relative z-10">
+                "I sold my 2400 sq.ft A-Khata plot in Sarjapur within 12 days. The verification badge gave the buyer the confidence they needed without endless negotiations."
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 overflow-hidden">
+                  <img src="/agents/agent-1.jpg" alt="Seller" className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <h4 className="font-black text-lg">Rajesh Kumar</h4>
+                  <p className="text-sm font-bold text-white/70 italic">Plot Owner, Bangalore South</p>
+                </div>
+              </div>
+              <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mb-32" />
+            </div>
+            <div className="absolute inset-0 bg-primary/20 blur-[100px] -z-10 translate-y-10 scale-90" />
+          </div>
+
+          <div className="space-y-10">
+            <div>
+              <h2 className="text-3xl md:text-5xl font-black text-text-primary mb-6 leading-tight">Frequently Asked <span className="text-primary italic">Seller Questions</span></h2>
+              <p className="text-text-secondary font-medium italic">Everything you need to know about selling land on IndiaLand.</p>
+            </div>
+
+            <div className="space-y-4 min-h-[400px]"> {/* min-h helps stabilize the layout */}
+              {[
+                { q: "Is listing my plot truly free?", a: "Yes, basic listing is free. We only charge a small success fee upon closing or for premium drone-assisted shoots." },
+                { q: "What is 'Diamond Verification'?", a: "It's our gold-standard vetting where our lawyers verify the Mother Deed, EC, and Encumbrance status for the buyer." },
+                { q: "How long until I get my first lead?", a: "Verified plots typically see their first high-intent inquiry within 48-72 hours of listing." }
+              ].map((faq, i) => (
+                <div 
+                  key={i} 
+                  onClick={() => setActiveFaq(activeFaq === i ? null : i)}
+                  className={`bg-white rounded-3xl border transition-all duration-300 cursor-pointer overflow-hidden ${
+                    activeFaq === i ? 'border-primary ring-4 ring-primary/5' : 'border-border-subtle hover:border-primary/30'
+                  }`}
+                >
+                  <div className="p-6">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-base font-black text-text-primary flex items-center gap-3">
+                        <HelpCircle className={`w-5 h-5 transition-colors ${activeFaq === i ? 'text-primary' : 'text-text-muted'}`} /> {faq.q}
+                      </h4>
+                      <ArrowDown className={`w-5 h-5 transition-transform duration-300 ${
+                        activeFaq === i ? 'rotate-180 text-primary' : 'text-text-muted'
+                      }`} />
+                    </div>
+                    
+                    <div className={`grid transition-all duration-500 ease-in-out ${
+                      activeFaq === i ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'
+                    }`}>
+                      <div className="overflow-hidden">
+                        <p className="text-sm font-medium text-text-secondary italic leading-relaxed">
+                          {faq.a}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-6">
+              <div className="flex items-center gap-4 p-6 bg-primary/5 rounded-3xl border border-primary/10">
+                 <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white">
+                   <MessageCircle className="w-6 h-6" />
+                 </div>
+                 <div>
+                   <p className="text-sm font-black text-text-primary">Need more help?</p>
+                   <p className="text-xs font-bold text-text-muted">Chat with our Seller Support team available 24/7.</p>
+                 </div>
+              </div>
             </div>
           </div>
         </div>
