@@ -66,6 +66,9 @@ export function Navbar() {
           <Link href="/legal" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
             Legal Services
           </Link>
+          <Link href="/calculators/stamp-duty" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
+            Stamp Duty Calc
+          </Link>
         </nav>
 
         {/* CTAs */}
@@ -127,6 +130,13 @@ export function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               Legal Services
+            </Link>
+            <Link 
+              href="/calculators/stamp-duty" 
+              className="text-lg font-semibold text-text-secondary hover:text-primary"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Stamp Duty Calculator
             </Link>
             <hr className="border-border-subtle my-2" />
             <Link href="/post-property" onClick={() => setIsMenuOpen(false)} className="w-full">

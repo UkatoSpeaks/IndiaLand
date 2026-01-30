@@ -52,7 +52,7 @@ export function Footer() {
               <li><Link href="#" className="text-text-secondary text-sm hover:text-primary transition-colors">RERA Guidance</Link></li>
               <li><Link href="#" className="text-text-secondary text-sm hover:text-primary transition-colors">Land Surveying</Link></li>
               <li><Link href="#" className="text-text-secondary text-sm hover:text-primary transition-colors">Legal Verification</Link></li>
-              <li><Link href="#" className="text-text-secondary text-sm hover:text-primary transition-colors">Plot Loans</Link></li>
+              <li><Link href="/calculators/stamp-duty" className="text-text-secondary text-sm hover:text-primary transition-colors">Stamp Duty Calculator</Link></li>
             </ul>
           </div>
 
