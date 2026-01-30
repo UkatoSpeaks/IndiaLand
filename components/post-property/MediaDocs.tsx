@@ -249,10 +249,10 @@ export function MediaDocs({ data, updateData, onNext, onBack }: StepProps) {
         <div className="flex items-center gap-4">
            <button className="text-sm font-bold text-text-muted hover:text-primary transition-colors">Save Draft</button>
            <Button 
-            disabled={!certify}
+            disabled={!certify || data.fileUrls.length === 0 || !data.reraNumber}
             onClick={onNext}
             size="lg" 
-            className="rounded-2xl px-12 h-16 font-bold shadow-xl shadow-primary/20 flex items-center gap-2"
+            className="rounded-2xl px-12 h-16 font-bold shadow-xl shadow-primary/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             Save & Continue <ChevronRight className="w-5 h-5" />
           </Button>

@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { MessageCircle, ArrowRight } from "lucide-react";
+import { MessageCircle } from "lucide-react";
+import Link from "next/link";
 
 export function CTABanner() {
   return (
@@ -22,9 +23,11 @@ export function CTABanner() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6">
-            <Button className="w-full sm:w-auto px-12 h-16 bg-white text-primary hover:bg-white/90 rounded-2xl text-lg font-bold shadow-2xl">
-              Post Your Plot Now
-            </Button>
+            <Link href="/post-property" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto px-12 h-16 bg-white text-primary hover:bg-white/90 rounded-2xl text-lg font-bold shadow-2xl">
+                Post Your Plot Now
+              </Button>
+            </Link>
             <Button variant="secondary" className="w-full sm:w-auto px-12 h-16 bg-transparent border-2 border-white/30 text-white hover:bg-white/10 rounded-2xl text-lg font-bold">
               <MessageCircle className="w-5 h-5 mr-3" /> Speak to Expert
             </Button>

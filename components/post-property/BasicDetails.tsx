@@ -145,9 +145,10 @@ export function BasicDetails({ data, updateData, onNext }: StepProps) {
           Save Draft
         </Button>
         <Button 
+          disabled={!data.title || !data.city || !data.locality}
           onClick={onNext}
           size="lg" 
-          className="rounded-2xl px-12 h-16 font-bold shadow-xl shadow-primary/20 flex items-center gap-2"
+          className="rounded-2xl px-12 h-16 font-bold shadow-xl shadow-primary/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           Next: Property Info <ChevronRight className="w-5 h-5" />
         </Button>

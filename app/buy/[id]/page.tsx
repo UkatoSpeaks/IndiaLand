@@ -45,22 +45,110 @@ const ICON_MAP: Record<string, any> = {
   CloudRain
 };
 
+import { 
+  GoogleMap, 
+  useJsApiLoader, 
+  Marker 
+} from "@react-google-maps/api";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "@/context/AuthContext";
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '100%'
+};
+
 export default function PlotDetails() {
   const { id } = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const [plot, setPlot] = useState<Plot | null>(null);
   const [isAgentRevealed, setIsAgentRevealed] = useState(false);
+  const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
+  
+  // Form states
+  const [agentForm, setAgentForm] = useState({ name: "", phone: "" });
+  const [loanForm, setLoanForm] = useState({ income: "", duration: "", profession: "Salaried" });
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState<"agent" | "loan" | null>(null);
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
+  });
 
   useEffect(() => {
     const foundPlot = MOCK_LISTINGS.find(p => p.id === id);
     if (foundPlot) {
       setPlot(foundPlot);
+      // Pre-fill if user is logged in
+      if (user) {
+        setAgentForm({ name: user.displayName || "", phone: user.phoneNumber || "" });
+      }
     }
-  }, [id]);
+  }, [id, user]);
 
   const recommendedPlots = useMemo(() => {
     return MOCK_LISTINGS.filter(p => p.id !== id).slice(0, 3);
   }, [id]);
+
+  const handleAgentInquiry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await addDoc(collection(db, "property_inquiries"), {
+        plotId: id,
+        plotTitle: plot?.title,
+        userName: agentForm.name,
+        userPhone: agentForm.phone,
+        userEmail: user?.email || "N/A",
+        agentName: plot?.agent.name,
+        timestamp: serverTimestamp(),
+        status: "New"
+      });
+      setSuccess("agent");
+      setTimeout(() => setSuccess(null), 5000);
+    } catch (err) {
+      console.error("Error submitting inquiry:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleLoanSubmission = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await addDoc(collection(db, "loan_leads"), {
+        plotId: id,
+        plotPrice: plot?.price,
+        userName: user?.displayName || "Anonymous",
+        userPhone: user?.phoneNumber || "N/A",
+        userEmail: user?.email || "N/A",
+        monthlyIncome: loanForm.income,
+        loanDuration: loanForm.duration,
+        profession: loanForm.profession,
+        timestamp: serverTimestamp(),
+        status: "Pending Review"
+      });
+      setSuccess("loan");
+      setTimeout(() => {
+        setSuccess(null);
+        setIsLoanModalOpen(false);
+      }, 3000);
+    } catch (err) {
+      console.error("Error submitting loan lead:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openInGoogleMaps = () => {
+    if (plot) {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${plot.lat},${plot.lng}`, '_blank');
+    }
+  };
 
   if (!plot) {
     return (
@@ -78,6 +166,87 @@ export default function PlotDetails() {
   return (
     <div className="min-h-screen bg-[#F4F4F5]">
       <Navbar />
+
+      {/* Loan Eligibility Modal */}
+      {isLoanModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+           <div className="bg-white w-full max-w-lg rounded-[48px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 relative">
+              <button 
+                onClick={() => setIsLoanModalOpen(false)}
+                className="absolute top-8 right-8 w-10 h-10 bg-section rounded-2xl flex items-center justify-center text-text-muted hover:text-primary transition-colors z-10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="p-10 space-y-8">
+                <div className="text-center space-y-2">
+                  <div className="w-16 h-16 bg-primary/10 rounded-[24px] flex items-center justify-center mx-auto mb-4">
+                    <TrendingUp className="w-8 h-8 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-black text-text-primary uppercase italic">Loan Eligibility Check</h3>
+                  <p className="text-sm font-bold text-text-muted">Fill in your basic details to get instant offers.</p>
+                </div>
+
+                {success === "loan" ? (
+                  <div className="bg-green-50 border border-green-100 p-8 rounded-[32px] text-center space-y-4">
+                    <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto text-white shadow-lg shadow-green-200">
+                      <CheckCircle2 className="w-8 h-8" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-lg font-black text-green-700 italic uppercase">Success!</h4>
+                      <p className="text-sm font-bold text-green-600">Our banking expert will contact you within 2 hours.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleLoanSubmission} className="space-y-5">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-4">Monthly Income (₹)</label>
+                      <input 
+                        type="number" 
+                        required
+                        value={loanForm.income}
+                        onChange={(e) => setLoanForm({ ...loanForm, income: e.target.value })}
+                        placeholder="e.g. 75000"
+                        className="w-full h-14 bg-section rounded-2xl border border-border-subtle px-6 text-sm font-bold text-text-primary outline-none focus:border-primary transition-all shadow-inner" 
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-4">Duration (Years)</label>
+                        <select 
+                          value={loanForm.duration}
+                          onChange={(e) => setLoanForm({ ...loanForm, duration: e.target.value })}
+                          className="w-full h-14 bg-section rounded-2xl border border-border-subtle px-6 text-sm font-bold text-text-primary outline-none focus:border-primary transition-all shadow-inner"
+                        >
+                          {[5, 10, 15, 20, 25, 30].map(y => <option key={y} value={y}>{y} Years</option>)}
+                        </select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-4">Profession</label>
+                        <select 
+                          value={loanForm.profession}
+                          onChange={(e) => setLoanForm({ ...loanForm, profession: e.target.value })}
+                          className="w-full h-14 bg-section rounded-2xl border border-border-subtle px-6 text-sm font-bold text-text-primary outline-none focus:border-primary transition-all shadow-inner"
+                        >
+                          <option value="Salaried">Salaried</option>
+                          <option value="Self-Employed">Self-Employed</option>
+                          <option value="Business">Business Owner</option>
+                        </select>
+                      </div>
+                    </div>
+                    <Button 
+                      type="submit" 
+                      disabled={submitting}
+                      className="w-full h-16 rounded-[24px] bg-primary text-white font-black text-sm uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                      {submitting ? "Processing..." : "Submit Application"}
+                    </Button>
+                  </form>
+                )}
+              </div>
+           </div>
+        </div>
+      )}
 
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10">
         {/* Breadcrumbs */}
@@ -146,7 +315,7 @@ export default function PlotDetails() {
                   </h1>
                   <p className="flex items-center gap-2 text-text-secondary font-medium">
                     <MapPin className="w-4 h-4 text-primary" />
-                    {plot.subLocation}, Bangalore | Near Outer Ring Road
+                    {plot.subLocation}, {plot.location.split(',')[1]?.trim() || 'Bangalore'}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -170,7 +339,7 @@ export default function PlotDetails() {
               <div className="bg-white p-6 rounded-[28px] border border-border-subtle shadow-sm group hover:border-primary/30 transition-all">
                 <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block mb-2">Plot Area</span>
                 <span className="text-xl font-black text-text-primary block">{plot.area} {plot.units}</span>
-                <span className="text-[11px] font-bold text-text-muted">~ 2.75 Guntas</span>
+                <span className="text-[11px] font-bold text-text-muted">High ROI Potential</span>
               </div>
               <div className="bg-white p-6 rounded-[28px] border border-border-subtle shadow-sm group hover:border-primary/30 transition-all">
                 <span className="text-[10px] font-black text-text-muted uppercase tracking-widest block mb-2">Facing</span>
@@ -241,7 +410,13 @@ export default function PlotDetails() {
                     <div key={bank} className="bg-white px-4 py-2 rounded-xl text-[10px] font-black text-text-muted shadow-sm border border-border-subtle">{bank}</div>
                   ))}
                 </div>
-                <Button variant="primary" className="rounded-2xl px-10 h-14 font-black shadow-xl shadow-primary/20">Check Eligibility</Button>
+                <Button 
+                  onClick={() => setIsLoanModalOpen(true)}
+                  variant="primary" 
+                  className="rounded-2xl px-10 h-14 font-black shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
+                >
+                  Check Eligibility
+                </Button>
                </div>
                <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
             </div>
@@ -271,25 +446,44 @@ export default function PlotDetails() {
             <div className="mb-12">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-black text-text-primary">Location & Neighborhood</h3>
-                <button className="flex items-center gap-2 text-primary font-black text-sm hover:underline">
+                <button 
+                  onClick={openInGoogleMaps}
+                  className="flex items-center gap-2 text-primary font-black text-sm hover:underline"
+                >
                   <ExternalLink className="w-4 h-4" /> Open in Google Maps
                 </button>
               </div>
-              <div className="h-[400px] w-full bg-white rounded-[32px] border border-border-subtle relative overflow-hidden group">
-                 <img src="/map-placeholder.png" alt="Map" className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" />
-                 <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative">
-                      <div className="w-12 h-12 bg-primary/20 rounded-full animate-ping" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                         <div className="bg-primary text-white p-3 rounded-2xl shadow-2xl">
-                           <MapPin className="w-6 h-6" />
-                         </div>
-                      </div>
-                    </div>
-                 </div>
+              <div className="h-[400px] w-full bg-section rounded-[32px] border border-border-subtle relative overflow-hidden group shadow-inner">
+                 {isLoaded ? (
+                   <GoogleMap
+                     mapContainerStyle={mapContainerStyle}
+                     center={{ lat: plot.lat, lng: plot.lng }}
+                     zoom={15}
+                     options={{
+                       disableDefaultUI: true,
+                       styles: [
+                        { "featureType": "all", "elementType": "labels.text.fill", "stylers": [{ "color": "#7c93a3" }, { "lightness": "-10" }] },
+                        { "featureType": "administrative.country", "elementType": "geometry", "stylers": [{ "visibility": "on" }] },
+                        { "featureType": "landscape", "elementType": "geometry", "stylers": [{ "color": "#f5f5f5" }, { "lightness": "20" }] },
+                        { "featureType": "poi", "elementType": "geometry", "stylers": [{ "color": "#f5f5f5" }, { "lightness": "21" }] },
+                        { "featureType": "road.highway", "elementType": "geometry.fill", "stylers": [{ "color": "#ffffff" }, { "lightness": "17" }] },
+                        { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#e9e9e9" }, { "lightness": "17" }] }
+                      ]
+                     }}
+                   >
+                     <Marker position={{ lat: plot.lat, lng: plot.lng }} />
+                   </GoogleMap>
+                 ) : (
+                   <div className="w-full h-full flex items-center justify-center bg-section animate-pulse">
+                     <p className="text-xs font-black text-text-muted uppercase tracking-widest italic">Loading Map View...</p>
+                   </div>
+                 )}
                  <div className="absolute bottom-6 right-6">
-                    <button className="bg-white/95 backdrop-blur-sm px-6 py-3 rounded-2xl shadow-2xl border border-border-subtle text-[13px] font-black text-text-primary flex items-center gap-2 hover:bg-primary hover:text-white transition-all">
-                      <Navigation className="w-4 h-4" /> View in Google Maps
+                    <button 
+                      onClick={openInGoogleMaps}
+                      className="bg-white/95 backdrop-blur-sm px-6 py-3 rounded-2xl shadow-2xl border border-border-subtle text-[13px] font-black text-text-primary flex items-center gap-2 hover:bg-primary hover:text-white transition-all group"
+                    >
+                      <Navigation className="w-4 h-4 group-hover:rotate-12 transition-transform" /> View in Google Maps
                     </button>
                  </div>
               </div>
@@ -301,19 +495,22 @@ export default function PlotDetails() {
             <div className="sticky top-28 space-y-6">
               {/* Agent Card / Reveal Button */}
               {!isAgentRevealed ? (
-                <div className="bg-white rounded-[40px] p-8 border border-border-subtle shadow-xl shadow-primary/5 text-center relative z-20">
-                  <div className="w-20 h-20 rounded-[28px] overflow-hidden bg-primary-light mx-auto mb-6">
-                    <img src={plot.agent.image} alt="Agent Placeholder" className="w-full h-full object-cover grayscale opacity-50" />
+                <div className="bg-white rounded-[40px] p-8 border border-border-subtle shadow-xl shadow-primary/5 text-center relative z-20 overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-[28px] overflow-hidden bg-primary/10 mx-auto mb-6 flex items-center justify-center">
+                      <User className="w-10 h-10 text-primary opacity-40" />
+                    </div>
+                    <h4 className="text-lg font-black text-text-primary mb-2">Interested in this Plot?</h4>
+                    <p className="text-xs font-bold text-text-muted mb-8 italic">Reveal agent details and get a quick callback.</p>
+                    <Button 
+                      onClick={() => setIsAgentRevealed(true)}
+                      variant="primary" 
+                      className="w-full h-14 rounded-2xl font-black shadow-lg shadow-primary/20 flex items-center justify-center gap-3 animate-bounce-subtle"
+                    >
+                      <Phone className="w-5 h-5" /> Contact Agent
+                    </Button>
                   </div>
-                  <h4 className="text-lg font-black text-text-primary mb-2">Interested in this Plot?</h4>
-                  <p className="text-xs font-bold text-text-muted mb-8">Reveal agent details and get a quick callback.</p>
-                  <Button 
-                    onClick={() => setIsAgentRevealed(true)}
-                    variant="primary" 
-                    className="w-full h-14 rounded-2xl font-black shadow-lg shadow-primary/20 flex items-center justify-center gap-3 animate-bounce-subtle"
-                  >
-                    <Phone className="w-5 h-5" /> Contact Agent
-                  </Button>
                 </div>
               ) : (
                 <div className="bg-white rounded-[40px] p-8 border border-border-subtle shadow-xl shadow-primary/5 animate-in fade-in slide-in-from-right-4 duration-500 relative z-20">
@@ -330,47 +527,76 @@ export default function PlotDetails() {
                       <img src={plot.agent.image} alt={plot.agent.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="text-center">
-                      <h4 className="text-xl font-black text-text-primary">{plot.agent.name}</h4>
-                      <p className="text-sm font-bold text-text-muted mb-2">{plot.agent.role}</p>
+                      <h4 className="text-xl font-black text-text-primary uppercase tracking-tight italic">{plot.agent.name}</h4>
+                      <p className="text-sm font-bold text-text-muted mb-2 uppercase">{plot.agent.role}</p>
                       <span className="bg-verified/10 text-verified text-[10px] font-black px-3 py-1.5 rounded-lg border border-verified/20">RERA CERTIFIED</span>
                     </div>
                   </div>
 
                   <div className="space-y-3 mb-8">
-                    <button className="w-full h-14 rounded-2xl bg-primary text-white font-black shadow-lg shadow-primary/20 flex items-center justify-center gap-3 hover:translate-y-[-2px] transition-all active:scale-95">
+                    <a href={`tel:${plot.agent.phone}`} className="w-full h-14 rounded-2xl bg-primary text-white font-black shadow-lg shadow-primary/20 flex items-center justify-center gap-3 hover:translate-y-[-2px] transition-all active:scale-95">
                       <Phone className="w-5 h-5" /> Call Agent ({plot.agent.phone})
-                    </button>
+                    </a>
                     <button className="w-full h-14 rounded-2xl border-2 border-[#25D366]/20 bg-[#25D366]/5 text-[#25D366] font-black flex items-center justify-center gap-3 hover:bg-[#25D366] hover:text-white transition-all">
                       <MessageSquare className="w-5 h-5" /> WhatsApp Chat
                     </button>
                   </div>
 
-                  <div className="bg-section/50 rounded-3xl p-6 border border-border-subtle">
-                    <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-4 text-center">Request Callback</p>
-                    <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
-                      <input type="text" placeholder="Full Name" className="w-full h-12 bg-white rounded-xl border border-border-subtle px-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
-                      <div className="flex gap-2">
-                         <input type="text" value="+91" readOnly className="w-14 h-12 bg-white rounded-xl border border-border-subtle px-2 text-sm font-black text-center" />
-                         <input type="tel" placeholder="Phone Number" className="flex-1 h-12 bg-white rounded-xl border border-border-subtle px-4 text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
+                  <div className="bg-section/70 rounded-[32px] p-6 border border-border-subtle relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full -mr-10 -mt-10 blur-xl" />
+                    <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-4 text-center relative italic">Request Callback</p>
+                    
+                    {success === "agent" ? (
+                      <div className="bg-green-50 p-4 rounded-xl border border-green-100 flex items-center gap-3 text-green-600 font-bold text-xs italic">
+                        <CheckCircle2 className="w-4 h-4" /> Inquiry sent successfully!
                       </div>
-                      <Button variant="primary" className="w-full h-12 rounded-xl text-xs font-black shadow-lg shadow-primary/10 mt-2">Get Quick Details</Button>
-                    </form>
+                    ) : (
+                      <form className="space-y-3 relative" onSubmit={handleAgentInquiry}>
+                        <input 
+                          type="text" 
+                          required
+                          value={agentForm.name}
+                          onChange={(e) => setAgentForm({ ...agentForm, name: e.target.value })}
+                          placeholder="Full Name" 
+                          className="w-full h-12 bg-white rounded-xl border border-border-subtle px-4 text-sm font-bold placeholder:font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" 
+                        />
+                        <div className="flex gap-2">
+                          <input type="text" value="+91" readOnly className="w-14 h-12 bg-white rounded-xl border border-border-subtle px-2 text-sm font-black text-center" />
+                          <input 
+                            type="tel" 
+                            required
+                            value={agentForm.phone}
+                            onChange={(e) => setAgentForm({ ...agentForm, phone: e.target.value })}
+                            placeholder="Phone Number" 
+                            className="flex-1 h-12 bg-white rounded-xl border border-border-subtle px-4 text-sm font-bold placeholder:font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" 
+                          />
+                        </div>
+                        <Button 
+                          type="submit"
+                          disabled={submitting}
+                          variant="primary" 
+                          className="w-full h-12 rounded-xl text-[11px] font-black shadow-lg shadow-primary/10 mt-2 uppercase tracking-widest"
+                        >
+                          {submitting ? "Sending..." : "Get Quick Details"}
+                        </Button>
+                      </form>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Why Invest Highlights */}
-              <div className="bg-section/50 rounded-[40px] p-8 border border-border-subtle">
+              <div className="bg-white rounded-[40px] p-8 border border-border-subtle shadow-sm">
                 <h4 className="text-lg font-black text-text-primary mb-6 flex items-center gap-2 italic">
                   <TrendingUp className="w-5 h-5 text-primary" /> Why Invest Here?
                 </h4>
                 <div className="space-y-4">
                   {plot.highlights.map((highlight, i) => (
-                    <div key={i} className="flex gap-4">
+                    <div key={i} className="flex gap-4 group">
                       <div className="mt-1">
-                        <CheckCircle2 className="w-5 h-5 text-primary" />
+                        <CheckCircle2 className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
                       </div>
-                      <p className="text-sm font-bold text-text-secondary leading-snug">{highlight}</p>
+                      <p className="text-sm font-bold text-text-secondary leading-snug italic">{highlight}</p>
                     </div>
                   ))}
                 </div>
@@ -383,8 +609,8 @@ export default function PlotDetails() {
         <div className="mt-20 pt-20 border-t border-border-subtle">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-3xl font-black text-text-primary">Recommended Plots</h2>
-              <p className="text-text-secondary font-medium italic">Based on your interest in Bangalore South</p>
+              <h2 className="text-3xl font-black text-text-primary uppercase tracking-tight italic">Recommended Plots</h2>
+              <p className="text-text-secondary font-medium italic">Based on your interest in Bangalore</p>
             </div>
             <button className="flex items-center gap-2 text-primary font-black text-sm hover:underline" onClick={() => router.push('/buy')}>
               View All Plots <ArrowRight className="w-4 h-4" />

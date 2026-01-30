@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { BadgeCheck, ArrowRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -24,12 +25,16 @@ export function Hero() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start pt-4">
-              <Button size="lg" className="w-full sm:w-auto px-10 h-16 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20">
-                Post Property for FREE
-              </Button>
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto px-10 h-16 rounded-2xl text-lg font-bold border-2">
-                View Market Rates
-              </Button>
+              <Link href="/post-property" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto px-10 h-16 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20">
+                  Post Property for FREE
+                </Button>
+              </Link>
+              <Link href="/market-rates" className="w-full sm:w-auto">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto px-10 h-16 rounded-2xl text-lg font-bold border-2">
+                  View Market Rates
+                </Button>
+              </Link>
             </div>
             
             <div className="flex items-center justify-center lg:justify-start gap-4 pt-6">

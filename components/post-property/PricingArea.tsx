@@ -149,9 +149,10 @@ export function PricingArea({ data, updateData, onNext, onBack }: StepProps) {
           <ArrowLeft className="w-5 h-5" /> Back
         </Button>
         <Button 
+          disabled={!data.area || !data.price}
           onClick={onNext}
           size="lg" 
-          className="rounded-2xl px-12 h-16 font-bold shadow-xl shadow-primary/20 flex items-center gap-2"
+          className="rounded-2xl px-12 h-16 font-bold shadow-xl shadow-primary/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           Next: Media & Legal <ChevronRight className="w-5 h-5" />
         </Button>

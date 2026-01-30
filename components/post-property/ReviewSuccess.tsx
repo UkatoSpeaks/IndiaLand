@@ -5,16 +5,25 @@ import { CheckCircle2, LayoutDashboard, Share2, ArrowRight, Eye, ShieldCheck, Ma
 import { PropertyData } from "@/app/post-property/page";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "@/context/AuthContext";
 
 interface StepProps {
   data: PropertyData;
 }
 
 export function ReviewSuccess({ data }: StepProps) {
+  const { user } = useAuth();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
 
   const handlePublish = async () => {
+    if (!user) {
+      alert("You must be logged in to publish a listing.");
+      return;
+    }
+
     setIsPublishing(true);
     
     const listingData = {
@@ -22,27 +31,24 @@ export function ReviewSuccess({ data }: StepProps) {
       type: data.type,
       city: data.city,
       locality: data.locality,
-      area: parseFloat(data.area),
+      area: parseFloat(data.area) || 0,
       unit: data.unit,
       price: data.price,
       amenities: data.amenities,
       reraNumber: data.reraNumber,
       fileUrls: data.fileUrls,
       docUrls: data.docUrls,
+      userId: user.uid,
+      userEmail: user.email,
+      userName: user.displayName,
+      createdAt: serverTimestamp(),
+      status: "pending", // Pending legal check
+      trustScore: 85, // Default pre-verification score
     };
 
     try {
-      const response = await fetch("/api/listings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(listingData),
-      });
-
-      if (response.ok) {
-        setIsSubmitted(true);
-      } else {
-        throw new Error("Failed to publish listing");
-      }
+      await addDoc(collection(db, "listings"), listingData);
+      setIsSubmitted(true);
     } catch (error) {
       console.error("Publishing error:", error);
       alert("Failed to publish listing. Please try again.");

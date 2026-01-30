@@ -2,6 +2,7 @@
 
 import { Check, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 
 const plans = [
   {
@@ -87,14 +88,16 @@ export function Pricing() {
                 ))}
               </ul>
 
-              <Button 
-                variant={plan.variant} 
-                className={`w-full h-16 rounded-2xl text-lg font-bold ${
-                  plan.popular ? 'shadow-xl shadow-primary/20' : 'border-2'
-                }`}
-              >
-                {plan.cta}
-              </Button>
+              <Link href="/post-property" className="w-full">
+                <Button 
+                  variant={plan.variant} 
+                  className={`w-full h-16 rounded-2xl text-lg font-bold ${
+                    plan.popular ? 'shadow-xl shadow-primary/20' : 'border-2'
+                  }`}
+                >
+                  {plan.cta}
+                </Button>
+              </Link>
             </div>
           ))}
         </div>
