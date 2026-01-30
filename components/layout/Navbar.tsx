@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { User, Menu, X, ArrowRight } from "lucide-react";
+import { User, Menu, X, ArrowRight, LogOut } from "lucide-react";
 import { Button } from "../ui/Button";
+import { useAuth } from "@/context/AuthContext";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-border-subtle">
@@ -78,9 +80,30 @@ export function Navbar() {
               Post Property
             </Button>
           </Link>
-          <button className="flex items-center justify-center w-10 h-10 rounded-full bg-section border border-border-subtle text-text-secondary hover:text-primary hover:border-primary/30 transition-all">
-            <User className="w-5 h-5" />
-          </button>
+          
+          {user ? (
+            <Link href="/profile" className="flex items-center gap-3 bg-section px-4 py-2 rounded-2xl border border-border-subtle hover:border-primary/30 hover:bg-white transition-all group">
+              {user.photoURL ? (
+                <img src={user.photoURL} alt="User" className="w-8 h-8 rounded-full border border-primary/20 group-hover:border-primary/50" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                  <User className="w-4 h-4" />
+                </div>
+              )}
+              <div className="hidden md:block">
+                <p className="text-[10px] font-black text-text-primary uppercase tracking-wider leading-none">{user.displayName || "Plot Buyer"}</p>
+                <div className="text-[8px] font-bold text-text-muted group-hover:text-primary uppercase tracking-widest flex items-center gap-1 transition-colors mt-0.5">
+                   View Profile
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <Link href="/login">
+              <button className="flex items-center justify-center w-10 h-10 rounded-full bg-section border border-border-subtle text-text-secondary hover:text-primary hover:border-primary/30 transition-all">
+                <User className="w-5 h-5" />
+              </button>
+            </Link>
+          )}
           
           {/* Mobile Menu Toggle */}
           <button 
@@ -96,6 +119,22 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-border-subtle shadow-xl animate-in slide-in-from-top-4 duration-300 z-50">
           <div className="flex flex-col p-6 gap-4">
+            {user && (
+               <Link href="/profile" onClick={() => setIsMenuOpen(false)} className="p-4 bg-section rounded-2xl flex items-center gap-4 mb-2 border border-border-subtle active:border-primary/30 transition-all">
+                 {user.photoURL ? (
+                   <img src={user.photoURL} alt="User" className="w-12 h-12 rounded-full border border-primary/20" />
+                 ) : (
+                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                     <User className="w-6 h-6" />
+                   </div>
+                 )}
+                 <div className="flex-1">
+                    <h3 className="font-bold text-text-primary leading-tight">{user.displayName || "Verified User"}</h3>
+                    <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1 italic">View Profile Info</p>
+                 </div>
+                 <ArrowRight className="w-4 h-4 text-text-muted" />
+               </Link>
+            )}
             <Link 
               href="/buy" 
               className="text-xl font-bold text-text-primary hover:text-primary flex items-center justify-between"
@@ -138,6 +177,15 @@ export function Navbar() {
             >
               Stamp Duty Calculator
             </Link>
+            {!user && (
+              <Link 
+                href="/login" 
+                className="text-lg font-bold text-primary"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sign In / Sign Up
+              </Link>
+            )}
             <hr className="border-border-subtle my-2" />
             <Link href="/post-property" onClick={() => setIsMenuOpen(false)} className="w-full">
               <Button variant="primary" className="w-full h-12 rounded-xl font-black">Post Property</Button>

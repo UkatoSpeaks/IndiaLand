@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   description: "Find the perfect land or plot in India with PlotFinder. Trustworthy and professional real estate marketplace.",
 };
 
+import { AuthProvider } from "@/context/AuthContext";
+import ProtectRoute from "@/components/auth/ProtectRoute";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,7 +25,11 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-inter antialiased`}
       >
-        {children}
+        <AuthProvider>
+          <ProtectRoute>
+            {children}
+          </ProtectRoute>
+        </AuthProvider>
       </body>
     </html>
   );
