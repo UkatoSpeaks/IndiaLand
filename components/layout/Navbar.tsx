@@ -63,13 +63,18 @@ export function Navbar() {
           <Link href="/rera" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
             RERA Guide
           </Link>
+          <Link href="/legal" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
+            Legal Services
+          </Link>
         </nav>
 
         {/* CTAs */}
         <div className="flex items-center gap-4">
-          <Button variant="primary" size="md" className="hidden md:flex">
-            Post Property
-          </Button>
+          <Link href="/post-property">
+            <Button variant="primary" size="md" className="hidden md:flex">
+              Post Property
+            </Button>
+          </Link>
           <button className="flex items-center justify-center w-10 h-10 rounded-full bg-section border border-border-subtle text-text-secondary hover:text-primary hover:border-primary/30 transition-all">
             <User className="w-5 h-5" />
           </button>
@@ -116,8 +121,17 @@ export function Navbar() {
             >
               RERA Guide
             </Link>
+            <Link 
+              href="/legal" 
+              className="text-lg font-semibold text-text-secondary hover:text-primary"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Legal Services
+            </Link>
             <hr className="border-border-subtle my-2" />
-            <Button variant="primary" className="w-full h-12 rounded-xl font-black">Post Property</Button>
+            <Link href="/post-property" onClick={() => setIsMenuOpen(false)} className="w-full">
+              <Button variant="primary" className="w-full h-12 rounded-xl font-black">Post Property</Button>
+            </Link>
           </div>
         </div>
       )}

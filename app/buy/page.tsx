@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import { useState, useMemo, Suspense, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ListingMap } from "@/components/ui/ListingMap";
@@ -13,6 +13,8 @@ import { MOCK_LISTINGS } from "@/lib/data";
 
 function BuyPlotsContent() {
   const searchParams = useSearchParams();
+  const [listings, setListings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("city") || "");
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
   const [budget, setBudget] = useState(() => {
@@ -25,6 +27,21 @@ function BuyPlotsContent() {
   const [khataType, setKhataType] = useState<string[]>([]);
   const [reraOnly, setReraOnly] = useState(false);
 
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const response = await fetch("/api/listings");
+        const data = await response.json();
+        setListings(data);
+      } catch (error) {
+        console.error("Failed to fetch listings:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchListings();
+  }, []);
+
   const toggleKhata = (type: string) => {
     setKhataType(prev => 
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
@@ -32,25 +49,30 @@ function BuyPlotsContent() {
   };
 
   const filteredListings = useMemo(() => {
-    return MOCK_LISTINGS.filter(item => {
+    const source = listings.length > 0 ? listings : MOCK_LISTINGS;
+    return source.filter(item => {
       const matchesSearch = searchQuery === "" || 
                           item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           item.location.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesKhata = khataType.length === 0 || (item.khataType && khataType.includes(item.khataType));
       const matchesRera = !reraOnly || item.isRera;
       
-      const numericPrice = parseFloat(item.price.replace(/[^\d.]/g, ''));
+      const priceStr = String(item.price);
+      const numericPrice = parseFloat(priceStr.replace(/[^\d.]/g, ''));
       let priceInLakhs = 0;
-      if (item.price.toLowerCase().includes("crore")) {
+      if (priceStr.toLowerCase().includes("crore")) {
         priceInLakhs = numericPrice * 100;
-      } else if (item.price.toLowerCase().includes("lakh")) {
+      } else if (priceStr.toLowerCase().includes("lakh")) {
+        priceInLakhs = numericPrice;
+      } else {
+        // Assume lakhs if not specified for real data
         priceInLakhs = numericPrice;
       }
       const matchesBudget = priceInLakhs <= budget;
 
       return matchesSearch && matchesKhata && matchesRera && matchesBudget;
     });
-  }, [searchQuery, khataType, reraOnly, budget]);
+  }, [searchQuery, khataType, reraOnly, budget, listings]);
 
   const mapListings = useMemo(() => {
     return filteredListings.map(item => ({
@@ -79,7 +101,7 @@ function BuyPlotsContent() {
               <span className="text-primary">Bengaluru, KA</span>
             </div>
             <h1 className="text-2xl font-extrabold text-text-primary">
-              {filteredListings.length} Plots found in <span className="text-primary">Bengaluru South</span>
+              {isLoading ? "Finding Plots..." : `${filteredListings.length} Plots found in`} <span className="text-primary">Bengaluru South</span>
             </h1>
           </div>
 
