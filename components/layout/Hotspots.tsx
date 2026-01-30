@@ -22,7 +22,7 @@ export function Hotspots() {
           <p className="text-sm text-text-secondary">Rapidly developing regions in India</p>
         </div>
         <Link 
-          href="#" 
+          href="/hotspots" 
           className="group flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark transition-colors"
         >
           View all regions

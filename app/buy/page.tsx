@@ -1,31 +1,32 @@
 "use client";
 
-import { useState, useMemo, Suspense, useEffect } from "react";
+import { useState, useMemo, Suspense, useEffect, use } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ListingMap } from "@/components/ui/ListingMap";
 import { ListingCard } from "@/components/ui/ListingCard";
-import { Search, Filter, SlidersHorizontal, Map as MapIcon, Grid, ChevronDown, RefreshCcw, CheckCircle2, ArrowRight } from "lucide-react";
+import { LocalityHeader } from "@/components/search/LocalityHeader";
+import { SearchSidebar } from "@/components/search/SearchSidebar";
+import { Search, Map as MapIcon, Grid, RefreshCcw, ArrowRight, ChevronRight, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSearchParams } from "next/navigation";
 import { MOCK_LISTINGS } from "@/lib/data";
-
 
 function BuyPlotsContent() {
   const searchParams = useSearchParams();
   const [listings, setListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("city") || "");
+  const [localityContext] = useState(searchParams.get("locality") || "");
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
-  const [budget, setBudget] = useState(() => {
-    const b = searchParams.get("budget");
-    if (b === "10l-50l") return 50;
-    if (b === "50l-1cr") return 100;
-    if (b === "1cr+") return 500;
-    return 500;
+  
+  const [filters, setFilters] = useState({
+    budget: 500,
+    khataType: [] as string[],
+    reraOnly: false,
+    zoning: [] as string[],
+    possession: [] as string[]
   });
-  const [khataType, setKhataType] = useState<string[]>([]);
-  const [reraOnly, setReraOnly] = useState(false);
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -42,37 +43,37 @@ function BuyPlotsContent() {
     fetchListings();
   }, []);
 
-  const toggleKhata = (type: string) => {
-    setKhataType(prev => 
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-    );
-  };
-
   const filteredListings = useMemo(() => {
     const source = listings.length > 0 ? listings : MOCK_LISTINGS;
     return source.filter(item => {
+      // Search check
       const matchesSearch = searchQuery === "" || 
-                          item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.location.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesKhata = khataType.length === 0 || (item.khataType && khataType.includes(item.khataType));
-      const matchesRera = !reraOnly || item.isRera;
+                           item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                           item.location.toLowerCase().includes(searchQuery.toLowerCase());
       
+      // Locality context check (from hotspots)
+      const matchesLocality = !localityContext || item.location.includes(localityContext) || item.title.includes(localityContext);
+
+      // Khata check
+      const matchesKhata = filters.khataType.length === 0 || (item.khataType && filters.khataType.includes(item.khataType));
+      
+      // RERA check
+      const matchesRera = !filters.reraOnly || item.isRera;
+      
+      // Budget check
       const priceStr = String(item.price);
       const numericPrice = parseFloat(priceStr.replace(/[^\d.]/g, ''));
       let priceInLakhs = 0;
-      if (priceStr.toLowerCase().includes("crore")) {
-        priceInLakhs = numericPrice * 100;
-      } else if (priceStr.toLowerCase().includes("lakh")) {
-        priceInLakhs = numericPrice;
-      } else {
-        // Assume lakhs if not specified for real data
-        priceInLakhs = numericPrice;
-      }
-      const matchesBudget = priceInLakhs <= budget;
+      if (priceStr.toLowerCase().includes("crore")) priceInLakhs = numericPrice * 100;
+      else if (priceStr.toLowerCase().includes("lakh")) priceInLakhs = numericPrice;
+      else priceInLakhs = numericPrice;
+      
+      const matchesBudget = priceInLakhs <= filters.budget;
 
-      return matchesSearch && matchesKhata && matchesRera && matchesBudget;
+      // Note: Zoning and Possession are simulated filters for mock data unless added to MOCK_LISTINGS
+      return matchesSearch && matchesLocality && matchesKhata && matchesRera && matchesBudget;
     });
-  }, [searchQuery, khataType, reraOnly, budget, listings]);
+  }, [searchQuery, localityContext, filters, listings]);
 
   const mapListings = useMemo(() => {
     return filteredListings.map(item => ({
@@ -86,204 +87,156 @@ function BuyPlotsContent() {
     }));
   }, [filteredListings]);
 
+  const resetFilters = () => {
+    setFilters({
+      budget: 500,
+      khataType: [],
+      reraOnly: false,
+      zoning: [],
+      possession: []
+    });
+    setSearchQuery("");
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F4F5]">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between mb-8">
-          <div>
-            <div className="flex items-center gap-2 text-[13px] text-text-muted font-bold uppercase tracking-wider mb-2">
-              <span>Home</span>
-              <span>/</span>
-              <span>Residential Plots</span>
-              <span>/</span>
-              <span className="text-primary">Bengaluru, KA</span>
-            </div>
-            <h1 className="text-2xl font-extrabold text-text-primary">
-              {isLoading ? "Finding Plots..." : `${filteredListings.length} Plots found in`} <span className="text-primary">Bengaluru South</span>
-            </h1>
-          </div>
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
+        {/* Breadcrumbs & Navigation */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+          <nav className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-text-muted">
+            <span className="hover:text-primary cursor-pointer transition-colors">Home</span>
+            <ChevronRight className="w-3 h-3" />
+            <span>Search Market</span>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-primary">{localityContext || "All Plots"}</span>
+          </nav>
 
-          <div className="flex w-full md:w-auto items-center gap-3">
-            <div className="relative flex-1 md:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+          <div className="flex bg-white/50 backdrop-blur-sm border border-border-subtle rounded-2xl p-1 shadow-sm">
+            <button 
+              onClick={() => setViewMode("grid")}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${viewMode === "grid" ? "bg-[#0F172A] text-white shadow-xl shadow-black/10" : "text-text-secondary hover:bg-section"}`}
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              Grid View
+            </button>
+            <button 
+              onClick={() => setViewMode("map")}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${viewMode === "map" ? "bg-[#0F172A] text-white shadow-xl shadow-black/10" : "text-text-secondary hover:bg-section"}`}
+            >
+              <MapIcon className="w-4 h-4" />
+              Map Radar
+            </button>
+          </div>
+        </div>
+
+        {/* Locality Detailed Header (Contextual) */}
+        {localityContext && <LocalityHeader locality={localityContext} count={filteredListings.length} />}
+
+        {/* Unified Results Bar (Always Visible) */}
+        <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between mb-10 bg-white p-6 rounded-[32px] border border-border-subtle shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="bg-primary/10 p-3 rounded-2xl">
+              <RefreshCcw className={`w-5 h-5 text-primary ${isLoading ? 'animate-spin' : ''}`} />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-text-primary uppercase italic leading-none">
+                {isLoading ? "Syncing inventory..." : `${filteredListings.length} Verified Plots Found`}
+              </h1>
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">
+                Available in {localityContext || searchQuery || "India Market"}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            <div className="relative flex-1 md:w-80 group">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
               <input 
                 type="text" 
-                placeholder="Search Locality, Projects..."
-                className="w-full pl-11 pr-4 py-3 bg-white border border-border-subtle rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm font-medium transition-all"
+                placeholder="Search projects..."
+                className="w-full pl-12 pr-6 py-4 bg-section/50 border border-border-subtle rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none text-[12px] font-bold transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex bg-white border border-border-subtle rounded-2xl p-1 shadow-sm">
+
+            <div className="flex bg-section/50 border border-border-subtle rounded-2xl p-1 shrink-0">
               <button 
                 onClick={() => setViewMode("grid")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${viewMode === "grid" ? "bg-primary text-white shadow-md shadow-primary/20" : "text-text-secondary hover:bg-section"}`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === "grid" ? "bg-[#0F172A] text-white shadow-lg" : "text-text-secondary hover:bg-white"}`}
               >
-                <Grid className="w-4 h-4" />
-                Grid
+                <LayoutDashboard className="w-4 h-4" />
+                List
               </button>
               <button 
                 onClick={() => setViewMode("map")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${viewMode === "map" ? "bg-primary text-white shadow-md shadow-primary/20" : "text-text-secondary hover:bg-section"}`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === "map" ? "bg-[#0F172A] text-white shadow-lg" : "text-text-secondary hover:bg-white"}`}
               >
                 <MapIcon className="w-4 h-4" />
-                Map View
+                Map
               </button>
             </div>
           </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          <aside className="w-full lg:w-72 flex-shrink-0">
-            <div className="bg-white rounded-[32px] p-8 border border-border-subtle shadow-sm sticky top-28">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-lg font-extrabold text-text-primary flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-primary" />
-                  Filters
-                </h3>
-                <button 
-                  onClick={() => {
-                    setSearchQuery("");
-                    setKhataType([]);
-                    setReraOnly(false);
-                    setBudget(500);
-                  }}
-                  className="text-[11px] font-bold text-primary uppercase tracking-widest hover:underline flex items-center gap-1"
-                >
-                  <RefreshCcw className="w-3 h-3" />
-                  Reset
-                </button>
-              </div>
-
-              <div className="space-y-6 mb-10">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-text-muted uppercase tracking-wider">Budget (₹)</span>
-                  <span className="text-sm font-extrabold text-primary">Up to ₹{budget >= 100 ? `${(budget/100).toFixed(1)}Cr` : `${budget}L`}</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="10" 
-                  max="500" 
-                  step="10"
-                  value={budget}
-                  onChange={(e) => setBudget(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-section rounded-lg appearance-none cursor-pointer accent-primary" 
-                />
-                <div className="flex justify-between text-[10px] font-bold text-text-muted">
-                  <span>₹10 Lakh</span>
-                  <span>₹5 Crore</span>
-                </div>
-              </div>
-
-              <div className="space-y-4 mb-10">
-                <span className="text-xs font-bold text-text-muted uppercase tracking-wider block">Khata Type</span>
-                <div className="flex flex-wrap gap-2">
-                  {["A Khata", "B Khata", "DC Converted"].map(type => (
-                    <button
-                      key={type}
-                      onClick={() => toggleKhata(type)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${khataType.includes(type) ? "bg-primary/10 border-primary text-primary" : "border-border-subtle bg-section/50 text-text-secondary hover:border-primary/30"}`}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-4 mb-10">
-                <span className="text-xs font-bold text-text-muted uppercase tracking-wider block">RERA Status</span>
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${reraOnly ? "bg-primary border-primary text-white" : "border-border-subtle group-hover:border-primary/50"}`}>
-                    <input 
-                      type="checkbox" 
-                      className="hidden" 
-                      checked={reraOnly}
-                      onChange={() => setReraOnly(!reraOnly)}
-                    />
-                    {reraOnly && <CheckCircle2 className="w-3.5 h-3.5" />}
-                  </div>
-                  <span className="text-sm font-bold text-text-secondary">RERA Registered Only</span>
-                </label>
-              </div>
-
-              <div className="pt-6 border-t border-gray-50 flex items-center justify-between">
-                <span className="text-xs font-bold text-text-muted uppercase tracking-wider">Sort By</span>
-                <button className="flex items-center gap-2 text-sm font-bold text-text-primary">
-                  Recommended
-                  <ChevronDown className="w-4 h-4 text-primary" />
-                </button>
-              </div>
-            </div>
+          {/* Enhanced Filtering Sidebar */}
+          <aside className="w-full lg:w-80 flex-shrink-0">
+            <SearchSidebar filters={filters} setFilters={setFilters} onReset={resetFilters} />
           </aside>
 
+          {/* Listings Hub */}
           <div className="flex-1">
             {viewMode === "grid" ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {filteredListings.length > 0 ? (
-                  filteredListings.map(item => (
-                    <div key={item.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  filteredListings.map((item, i) => (
+                    <div key={item.id} className="animate-in fade-in slide-in-from-bottom-6 duration-700" style={{ animationDelay: `${i * 50}ms` }}>
                       <ListingCard {...item} />
                     </div>
                   ))
                 ) : (
-                  <div className="col-span-full py-20 text-center bg-white rounded-[32px] border border-dashed border-border-subtle">
-                    <RefreshCcw className="w-12 h-12 text-primary/20 mx-auto mb-4 animate-spin-slow" />
-                    <h3 className="text-xl font-bold text-text-primary mb-2">No plots match your criteria</h3>
-                    <p className="text-text-secondary">Try adjusting your filters or searching another area</p>
+                  <div className="col-span-full py-32 text-center bg-white rounded-[48px] border-2 border-dashed border-border-subtle">
+                    <RefreshCcw className="w-16 h-16 text-primary/10 mx-auto mb-6 animate-spin-slow" />
+                    <h3 className="text-2xl font-black text-text-primary italic uppercase tracking-tight">No match found</h3>
+                    <p className="text-text-secondary font-medium italic mt-2">Simplify your filters to see more results.</p>
                     <Button 
                       variant="outline" 
-                      className="mt-6 rounded-xl"
-                      onClick={() => {
-                        setSearchQuery("");
-                        setKhataType([]);
-                        setReraOnly(false);
-                        setBudget(500);
-                      }}
+                      className="mt-8 rounded-2xl border-2 font-black uppercase text-xs tracking-widest px-8 h-14"
+                      onClick={resetFilters}
                     >
-                      Clear All Filters
+                      Reset All Filters
                     </Button>
                   </div>
                 )}
-
-                <div 
-                  onClick={() => setViewMode("map")}
-                  className="md:col-span-1 bg-section rounded-[32px] border-2 border-dashed border-border-subtle p-8 flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white hover:border-primary/30 transition-all duration-300"
-                >
-                  <div className="w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                    <MapIcon className="w-8 h-8 transition-colors" />
-                  </div>
-                  <h3 className="text-xl font-extrabold text-text-primary mb-2">Explore Locally</h3>
-                  <p className="text-sm text-text-secondary mb-8 max-w-[200px]">
-                    See all plots near Metro Stations, Landmarks and Industrial Zones.
-                  </p>
-                  <Button variant="primary" className="rounded-2xl group-hover:scale-105 transition-transform">
-                    Launch Interactive Map
-                  </Button>
-                </div>
               </div>
             ) : (
-              <div className="h-[700px] w-full bg-white rounded-[32px] border border-border-subtle overflow-hidden shadow-inner">
+              <div className="h-[800px] w-full bg-white rounded-[48px] border border-border-subtle overflow-hidden shadow-2xl relative">
                 <ListingMap listings={mapListings} />
               </div>
             )}
 
+            {/* Pagination Engineering */}
             {filteredListings.length > 0 && (
-              <div className="mt-16 flex items-center justify-center gap-2">
-                <button className="w-10 h-10 rounded-xl border border-border-subtle flex items-center justify-center text-text-secondary hover:bg-white hover:text-primary transition-all">
-                  <ArrowRight className="w-4 h-4 rotate-180" />
+              <div className="mt-20 flex items-center justify-center gap-3">
+                <button className="w-12 h-12 rounded-2xl bg-white border border-border-subtle flex items-center justify-center text-text-muted hover:text-primary transition-all shadow-sm">
+                  <ArrowRight className="w-5 h-5 rotate-180" />
                 </button>
-                {[1, 2, 3, "...", 45].map((page, i) => (
+                {[1, 2, 3, "...", 12].map((page, i) => (
                   <button 
                     key={i}
-                    className={`h-10 px-4 rounded-xl border font-bold text-sm transition-all ${page === 1 ? "bg-primary border-primary text-white" : "bg-white border-border-subtle text-text-secondary hover:text-primary"}`}
+                    className={`h-12 px-6 rounded-2xl border text-xs font-black transition-all shadow-sm
+                      ${page === 1 ? "bg-primary border-primary text-white shadow-primary/20" : "bg-white border-border-subtle text-text-muted hover:border-primary hover:text-primary"}
+                      ${page === "..." ? "border-none shadow-none pointer-events-none" : ""}
+                    `}
                   >
                     {page}
                   </button>
                 ))}
-                <button className="w-10 h-10 rounded-xl border border-border-subtle flex items-center justify-center text-text-secondary hover:bg-white hover:text-primary transition-all">
-                  <ArrowRight className="w-4 h-4" />
+                <button className="w-12 h-12 rounded-2xl bg-white border border-border-subtle flex items-center justify-center text-text-muted hover:text-primary transition-all shadow-sm">
+                  <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
             )}
@@ -299,8 +252,14 @@ function BuyPlotsContent() {
 export default function BuyPlots() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#F4F4F5] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#F4F4F5] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-6" />
+        <h2 className="text-xl font-black text-text-primary uppercase tracking-widest italic animate-pulse">
+          IndiaLand Marketplace
+        </h2>
+        <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-2">
+          Syncing the latest inventory...
+        </p>
       </div>
     }>
       <BuyPlotsContent />

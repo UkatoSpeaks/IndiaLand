@@ -4,16 +4,20 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 
-const PUBLIC_ROUTES = ["/", "/login", "/signup", "/market-rates"];
+const PUBLIC_ROUTES = ["/", "/login", "/signup", "/market-rates", "/hotspots"];
 
 export default function ProtectRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
+  const isPublicRoute = PUBLIC_ROUTES.includes(pathname) || 
+                        pathname.startsWith("/hotspots/") || 
+                        pathname.startsWith("/market-rates/");
+
   useEffect(() => {
     if (!loading) {
-      if (!user && !PUBLIC_ROUTES.includes(pathname)) {
+      if (!user && !isPublicRoute) {
         router.push("/login");
       } else if (user && (pathname === "/login" || pathname === "/signup")) {
         router.push("/");

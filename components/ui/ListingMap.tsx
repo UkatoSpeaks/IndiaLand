@@ -55,11 +55,11 @@ const mapOptions = {
   ],
   disableDefaultUI: false,
   zoomControl: true,
-  mapTypeControl: true,
+  mapTypeControl: false,
   scaleControl: true,
-  streetViewControl: true,
-  rotateControl: true,
-  fullscreenControl: true,
+  streetViewControl: false,
+  rotateControl: false,
+  fullscreenControl: false,
   mapTypeId: 'roadmap',
 };
 
@@ -156,8 +156,8 @@ export function ListingMap({ listings }: ListingMapProps) {
       </GoogleMap>
       
       {/* Dynamic Overlay Controls */}
-      <div className="absolute top-4 left-4 flex flex-col gap-3 z-10">
-        <div className="bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-primary/20 pointer-events-none">
+      <div className="absolute top-6 right-6 flex flex-col items-end gap-3 z-10">
+        <div className="bg-[#0F172A]/90 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-2xl border border-white/10 pointer-events-none">
           <p className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -167,7 +167,7 @@ export function ListingMap({ listings }: ListingMapProps) {
           </p>
         </div>
 
-        <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-xl border border-border-subtle flex gap-1">
+        <div className="bg-[#0F172A]/90 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-white/10 flex gap-1">
           <button 
             onClick={() => setMapType('roadmap')}
             className={`p-2 rounded-xl transition-all ${mapType === 'roadmap' ? 'bg-primary text-white shadow-lg' : 'text-text-secondary hover:bg-section hover:text-primary'}`}
