@@ -32,8 +32,24 @@ function BuyPlotsContent() {
     const fetchListings = async () => {
       try {
         const response = await fetch("/api/listings");
-        const data = await response.json();
-        setListings(data);
+        const rawData = await response.json();
+        
+        // Normalize API data to match UI expectations
+        const normalizedData = rawData.map((item: any) => ({
+          ...item,
+          image: item.fileUrls?.[0] || "/placeholder-property.jpg",
+          location: `${item.locality || ""}, ${item.city || ""}`,
+          subLocation: item.locality,
+          lat: parseFloat(item.latitude) || 12.9716,
+          lng: parseFloat(item.longitude) || 77.5946,
+          pricePerSqft: item.area > 0 ? (parseFloat(item.price.replace(/[^\d.]/g, '')) / item.area).toFixed(0) : "0",
+          units: item.unit,
+          facing: "East Facing", // Default for now
+          connectivity: { metro: "2km away", highway: "500m away" }, // Default for now
+          isRera: !!item.reraNumber,
+        }));
+        
+        setListings(normalizedData);
       } catch (error) {
         console.error("Failed to fetch listings:", error);
       } finally {

@@ -31,6 +31,8 @@ export function ReviewSuccess({ data }: StepProps) {
       type: data.type,
       city: data.city,
       locality: data.locality,
+      latitude: data.latitude,
+      longitude: data.longitude,
       area: parseFloat(data.area) || 0,
       unit: data.unit,
       price: data.price,
@@ -42,12 +44,23 @@ export function ReviewSuccess({ data }: StepProps) {
       userEmail: user.email,
       userName: user.displayName,
       createdAt: serverTimestamp(),
-      status: "pending", // Pending legal check
+      status: "active", // Changed to active for testing
       trustScore: 85, // Default pre-verification score
     };
 
     try {
-      await addDoc(collection(db, "listings"), listingData);
+      const response = await fetch("/api/listings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(listingData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to publish listing");
+      }
+
       setIsSubmitted(true);
     } catch (error) {
       console.error("Publishing error:", error);

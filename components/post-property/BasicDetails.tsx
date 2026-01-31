@@ -1,8 +1,10 @@
 "use client";
 
-import { Home, Building2, Tractor, MapPin, Search, Navigation, ChevronRight } from "lucide-react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Home, Building2, Tractor, MapPin, Search, Navigation, ChevronRight, Loader2 } from "lucide-react";
 import { PropertyData } from "@/app/post-property/page";
 import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 interface StepProps {
   data: PropertyData;
@@ -11,6 +13,87 @@ interface StepProps {
 }
 
 export function BasicDetails({ data, updateData, onNext }: StepProps) {
+  const [isLocating, setIsLocating] = useState(false);
+  const [markerPos, setMarkerPos] = useState({ lat: 12.9716, lng: 77.5946 });
+  const [isDragging, setIsDragging] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  const handleUseCurrent = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setMarkerPos({ lat: latitude, lng: longitude });
+        updateData({ 
+          latitude: latitude.toString(), 
+          longitude: longitude.toString() 
+        });
+
+        // Simulate Reverse Geocoding
+        setTimeout(() => {
+          updateData({
+            city: "Bangalore",
+            locality: "Indiranagar",
+          });
+          setIsLocating(false);
+        }, 1500);
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        setIsLocating(false);
+        alert("Failed to get your location. Please enter it manually.");
+      }
+    );
+  };
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging || !mapRef.current) return;
+
+    const rect = mapRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+
+    // Convert pixel position to mock lat/lng
+    const latOffset = (rect.height / 2 - y) * 0.0001;
+    const lngOffset = (x - rect.width / 2) * 0.0001;
+    
+    const newPos = { 
+      lat: 12.9716 + latOffset, 
+      lng: 77.5946 + lngOffset 
+    };
+
+    setMarkerPos(newPos);
+  }, [isDragging]);
+
+  const handleMouseUpGlobal = useCallback(() => {
+    if (isDragging) {
+      setIsDragging(false);
+      updateData({ 
+        latitude: markerPos.lat.toString(), 
+        longitude: markerPos.lng.toString() 
+      });
+    }
+  }, [isDragging, markerPos, updateData]);
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUpGlobal);
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUpGlobal);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUpGlobal);
+    };
+  }, [isDragging, handleMouseMove, handleMouseUpGlobal]);
+
   const types = [
     { id: "Residential", icon: Home, label: "Residential", subtitle: "Housing, Villas, Apartments" },
     { id: "Commercial", icon: Building2, label: "Commercial", subtitle: "Offices, Retail, Warehouses" },
@@ -64,15 +147,17 @@ export function BasicDetails({ data, updateData, onNext }: StepProps) {
             <button
               key={type.id}
               onClick={() => updateData({ type: type.id })}
-              className={`p-6 rounded-2xl border-2 text-center transition-all group ${
+              className={cn(
+                "p-6 rounded-2xl border-2 text-center transition-all group",
                 data.type === type.id 
                 ? 'border-primary bg-primary/5 shadow-lg shadow-primary/5' 
                 : 'border-border-subtle hover:border-primary/30 bg-white'
-              }`}
+              )}
             >
-              <type.icon className={`w-10 h-10 mx-auto mb-4 transition-colors ${
+              <type.icon className={cn(
+                "w-10 h-10 mx-auto mb-4 transition-colors",
                 data.type === type.id ? 'text-primary' : 'text-text-muted group-hover:text-primary'
-              }`} />
+              )} />
               <p className="text-base font-bold text-text-primary">{type.label}</p>
               <p className="text-[10px] font-bold text-text-muted uppercase mt-1">{type.subtitle}</p>
             </button>
@@ -97,8 +182,17 @@ export function BasicDetails({ data, updateData, onNext }: StepProps) {
               placeholder="Search City, Locality or Landmark in India"
               className="w-full h-14 bg-section/50 rounded-2xl border border-border-subtle pl-14 pr-44 text-base font-bold outline-none focus:border-primary transition-all"
             />
-            <button className="absolute right-3 top-1/2 -translate-y-1/2 bg-primary/10 text-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-primary/20 transition-all">
-              <Navigation className="w-4 h-4" /> Use Current
+            <button 
+              onClick={handleUseCurrent}
+              disabled={isLocating}
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-primary/10 text-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-primary/20 transition-all disabled:opacity-50"
+            >
+              {isLocating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Navigation className="w-4 h-4" />
+              )}
+              {isLocating ? "Locating..." : "Use Current"}
             </button>
           </div>
 
@@ -125,21 +219,53 @@ export function BasicDetails({ data, updateData, onNext }: StepProps) {
             </div>
           </div>
 
-          {/* Map Placeholder */}
-          <div className="relative rounded-3xl overflow-hidden h-[300px] bg-section/50 border border-border-subtle">
-            <img src="/map-placeholder.png" alt="Map" className="w-full h-full object-cover grayscale opacity-60" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-white/40 backdrop-blur-[2px]">
-               <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-xl animate-bounce mb-4">
+          <div 
+            ref={mapRef}
+            className="relative rounded-3xl overflow-hidden h-[400px] bg-section/50 border border-border-subtle cursor-crosshair group/map select-none"
+            onMouseDown={() => setIsDragging(true)}
+          >
+            <img 
+              src="/map-placeholder.png" 
+              alt="Map" 
+              className="w-full h-full object-cover grayscale opacity-40 transition-all duration-700 group-hover/map:grayscale-0 group-hover/map:opacity-80" 
+            />
+            
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+
+            <div className={cn(
+              "absolute inset-0 flex flex-col items-center justify-center text-center p-6 transition-all duration-300 pointer-events-none",
+              isDragging ? "bg-black/10 backdrop-blur-[1px]" : "bg-white/30 backdrop-blur-[2px]"
+            )}>
+               <div className={cn(
+                 "w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-2xl transition-all duration-100",
+                 isDragging ? "scale-125 -translate-y-8 shadow-primary/40" : "animate-bounce-subtle"
+               )}
+               style={{
+                 position: 'absolute',
+                 left: `calc(${(markerPos.lng - 77.5946) / 0.0001 + 50}% - 24px)`,
+                 top: `calc(${50 - (markerPos.lat - 12.9716) / 0.0001}% - 24px)`
+               }}>
                   <MapPin className="w-6 h-6" />
                </div>
-               <p className="text-sm font-bold text-text-primary">Drag marker to the property site</p>
-               <p className="text-[10px] font-bold text-text-muted uppercase mt-1">Lat: 12.9716° N, Long: 77.5946° E</p>
+               
+               {!isDragging && (
+                 <div className="mt-20 bg-white/90 backdrop-blur p-4 rounded-2xl shadow-xl border border-primary/20 animate-in fade-in zoom-in-95">
+                   <p className="text-sm font-black text-text-primary tracking-tight">Drag marker to site</p>
+                   <p className="text-[10px] font-black text-primary uppercase mt-1">
+                     {markerPos.lat.toFixed(4)}° N, {markerPos.lng.toFixed(4)}° E
+                   </p>
+                 </div>
+               )}
+            </div>
+
+            <div className="absolute bottom-4 left-4 flex items-end gap-1 pointer-events-none">
+              <div className="w-16 h-1 border-x border-b border-text-primary/30" />
+              <span className="text-[8px] font-bold text-text-primary/40 uppercase">100m</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="flex items-center justify-between pt-6">
         <Button variant="outline" size="lg" className="rounded-2xl px-10 h-16 border-2 font-bold text-text-primary">
           Save Draft

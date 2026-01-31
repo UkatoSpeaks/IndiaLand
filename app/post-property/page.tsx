@@ -15,6 +15,8 @@ export type PropertyData = {
   type: string;
   city: string;
   locality: string;
+  latitude: string;
+  longitude: string;
   area: string;
   unit: string;
   price: string;
@@ -31,6 +33,8 @@ const INITIAL_DATA: PropertyData = {
   type: "Residential",
   city: "",
   locality: "",
+  latitude: "",
+  longitude: "",
   area: "",
   unit: "Sq Ft",
   price: "",
