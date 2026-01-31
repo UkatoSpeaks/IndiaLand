@@ -5,7 +5,7 @@ import { AgentCard } from "../ui/AgentCard";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
-const cities = ["Bangalore", "Mumbai", "Delhi NCR", "Hyderabad"];
+const cities = ["Bangalore", "Mumbai", "Delhi NCR", "Hyderabad", "Dehradun"];
 
 const agentsData = {
   Bangalore: [
@@ -19,6 +19,7 @@ const agentsData = {
       propertiesHandled: 154,
       specialization: ["Open Plots", "Industrial", "Agriculture"],
       languages: ["English", "Hindi", "Kannada"],
+      phone: "+919876543210",
     },
     {
       name: "Priya Sharma",
@@ -30,6 +31,7 @@ const agentsData = {
       propertiesHandled: 89,
       specialization: ["Villas", "Gated Community", "Apartments"],
       languages: ["English", "Hindi", "Telugu"],
+      phone: "+919876543211",
     },
     {
       name: "Amit Patel",
@@ -41,6 +43,7 @@ const agentsData = {
       propertiesHandled: 210,
       specialization: ["Showrooms", "Warehouse", "Tech Parks"],
       languages: ["English", "Hindi", "Gujarati"],
+      phone: "+919876543212",
     },
     {
       name: "Kavita Reddy",
@@ -52,6 +55,7 @@ const agentsData = {
       propertiesHandled: 120,
       specialization: ["Penthouse", "Gated Villas", "Indiranagar"],
       languages: ["English", "Kannada", "Hindi"],
+      phone: "+919876543213",
     },
     {
       name: "Suresh Menon",
@@ -63,6 +67,7 @@ const agentsData = {
       propertiesHandled: 75,
       specialization: ["North Bangalore", "Devanahalli", "BMRDA"],
       languages: ["English", "Malayalam", "Kannada"],
+      phone: "+919876543214",
     },
     {
       name: "Dr. Arvind Hegde",
@@ -74,6 +79,7 @@ const agentsData = {
       propertiesHandled: 450,
       specialization: ["Institutional Sales", "Legal Verif.", "High ROI"],
       languages: ["English", "Kannada", "Sanskrit"],
+      phone: "+919876543215",
     },
   ],
   Mumbai: [
@@ -87,6 +93,7 @@ const agentsData = {
       propertiesHandled: 320,
       specialization: ["Penthouses", "Sea-facing", "Bungalows"],
       languages: ["English", "Hindi", "Marathi"],
+      phone: "+919876543216",
     },
     {
       name: "Neha Gupta",
@@ -98,6 +105,7 @@ const agentsData = {
       propertiesHandled: 45,
       specialization: ["Studio Flats", "Smart Homes", "Rentals"],
       languages: ["English", "Hindi", "Punjabi"],
+      phone: "+919876543217",
     },
     {
       name: "Vikram Singh",
@@ -109,6 +117,7 @@ const agentsData = {
       propertiesHandled: 112,
       specialization: ["ROI Focused", "Commercial Land", "Redevelopment"],
       languages: ["English", "Hindi", "Bengali"],
+      phone: "+919876543218",
     },
     {
       name: "Anjali Deshmukh",
@@ -120,6 +129,7 @@ const agentsData = {
       propertiesHandled: 130,
       specialization: ["BKC", "Powai", "Offices"],
       languages: ["English", "Marathi", "Hindi"],
+      phone: "+919876543219",
     },
     {
       name: "Rahul Kothari",
@@ -131,6 +141,7 @@ const agentsData = {
       propertiesHandled: 55,
       specialization: ["Andheri", "Borivali", "Interiors"],
       languages: ["English", "Gujarati", "Hindi"],
+      phone: "+919876543220",
     },
     {
       name: "Pratap Salve",
@@ -142,6 +153,7 @@ const agentsData = {
       propertiesHandled: 180,
       specialization: ["SRA Projects", "Chawl Redev.", "Society Law"],
       languages: ["English", "Marathi", "Hindi"],
+      phone: "+919876543221",
     },
   ],
   "Delhi NCR": [
@@ -155,6 +167,7 @@ const agentsData = {
       propertiesHandled: 178,
       specialization: ["HUDA Plots", "Farmhouses", "Commercial Plots"],
       languages: ["English", "Hindi", "Haryanvi"],
+      phone: "+919876543222",
     },
     {
       name: "Meenakshi Iyer",
@@ -166,6 +179,7 @@ const agentsData = {
       propertiesHandled: 92,
       specialization: ["Builder Floors", "Kothis", "Resale"],
       languages: ["English", "Hindi", "Tamil"],
+      phone: "+919876543223",
     },
     {
       name: "Rohan Khanna",
@@ -177,6 +191,7 @@ const agentsData = {
       propertiesHandled: 105,
       specialization: ["Office Space", "Retail Outlets", "Malls"],
       languages: ["English", "Hindi", "Urdu"],
+      phone: "+919876543224",
     },
     {
       name: "Poonam Tyagi",
@@ -188,6 +203,7 @@ const agentsData = {
       propertiesHandled: 140,
       specialization: ["Noida Extension", "Ready-to-move", "Greenery"],
       languages: ["English", "Hindi", "Pahadi"],
+      phone: "+919876543225",
     },
     {
       name: "Aditya Bansal",
@@ -199,6 +215,7 @@ const agentsData = {
       propertiesHandled: 82,
       specialization: ["Golf Course Road", "Cyber Hub", "Startups"],
       languages: ["English", "Hindi", "Marwari"],
+      phone: "+919876543226",
     },
     {
       name: "Jagdish Chawla",
@@ -210,6 +227,7 @@ const agentsData = {
       propertiesHandled: 60,
       specialization: ["Legacy Assets", "Heritage Kothis", "Diplomatic Area"],
       languages: ["English", "Hindi", "Punjabi"],
+      phone: "+919876543227",
     },
   ],
   Hyderabad: [
@@ -223,6 +241,7 @@ const agentsData = {
       propertiesHandled: 198,
       specialization: ["HITEC City", "Gachibowli", "Plots"],
       languages: ["English", "Hindi", "Telugu"],
+      phone: "+919876543228",
     },
     {
       name: "Saritha Rao",
@@ -234,6 +253,7 @@ const agentsData = {
       propertiesHandled: 67,
       specialization: ["Luxury Villas", "Community Living", "Kokapet"],
       languages: ["English", "Hindi", "Telugu", "Kannada"],
+      phone: "+919876543229",
     },
     {
       name: "Venkat Prabhu",
@@ -245,6 +265,7 @@ const agentsData = {
       propertiesHandled: 245,
       specialization: ["Factories", "Warehouses", "Zoned Land"],
       languages: ["English", "Hindi", "Tamil"],
+      phone: "+919876543230",
     },
     {
       name: "Madhavi Latha",
@@ -256,6 +277,7 @@ const agentsData = {
       propertiesHandled: 110,
       specialization: ["Apartments", "Retail", "Residential Plots"],
       languages: ["English", "Telugu", "Hindi"],
+      phone: "+919876543231",
     },
     {
       name: "Arjun Yadav",
@@ -267,6 +289,7 @@ const agentsData = {
       propertiesHandled: 95,
       specialization: ["Moinabad", "Chevella", "Avenue Plantation"],
       languages: ["English", "Telugu", "Hindi"],
+      phone: "+919876543232",
     },
     {
       name: "Gopal Krishna Murthy",
@@ -278,6 +301,57 @@ const agentsData = {
       propertiesHandled: 500,
       specialization: ["Legal Audits", "Gram Panchayat", "HMDA"],
       languages: ["English", "Telugu", "Hindi", "Sanskrit"],
+      phone: "+919876543210",
+    },
+  ],
+  Dehradun: [
+    {
+      name: "Vikram Negi",
+      image: "/agents/agent1.png",
+      role: "Hill Station Land Expert",
+      city: "Dehradun",
+      experience: "10+ Years",
+      rating: 4.9,
+      propertiesHandled: 120,
+      specialization: ["Residential Plots", "Cottages", "Sahastradhara"],
+      languages: ["English", "Hindi", "Garhwali"],
+      phone: "+919876543233",
+    },
+    {
+      name: "Sonia Rawat",
+      image: "/agents/agent2.png",
+      role: "Property Consultant",
+      city: "Dehradun",
+      experience: "6+ Years",
+      rating: 4.8,
+      propertiesHandled: 55,
+      specialization: ["Rajpur Road", "Villas", "Agriculture"],
+      languages: ["English", "Hindi", "Pahadi"],
+      phone: "+919876543234",
+    },
+    {
+      name: "Deepak Chauhan",
+      image: "/agents/agent3.png",
+      role: "Commercial Specialist",
+      city: "Dehradun",
+      experience: "15+ Years",
+      rating: 4.7,
+      propertiesHandled: 140,
+      specialization: ["Dalanwala", "Retail Space", "Warehousing"],
+      languages: ["English", "Hindi", "Punjabi"],
+      phone: "+919876543235",
+    },
+    {
+      name: "Aman Semwal",
+      image: "/agents/agent4.png",
+      role: "Land Acquisition Lead",
+      city: "Dehradun",
+      experience: "8+ Years",
+      rating: 4.8,
+      propertiesHandled: 92,
+      specialization: ["Mussoorie Area", "Farmhouses", "Plots"],
+      languages: ["English", "Hindi", "Garhwali"],
+      phone: "+919876543236",
     },
   ],
 };

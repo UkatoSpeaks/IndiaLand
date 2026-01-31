@@ -167,5 +167,48 @@ export const MOCK_LISTINGS: Plot[] = [
       image: "/agents/agent3.png",
       phone: "+91 98XXX XXX03"
     }
+  },
+  {
+    id: "4",
+    image: "/plots/plot1.png",
+    images: ["/plots/plot1.png", "/plots/plot2.png", "/plots/plot3.png"],
+    title: "Mountain View Eco-Resort Plot",
+    location: "Rajpur Road, Dehradun",
+    subLocation: "Near New Mussoorie Diversion",
+    price: "₹85 Lakh",
+    pricePerSqft: "5,312",
+    area: "1,600",
+    units: "sq.ft",
+    type: "Residential",
+    facing: "North-East Facing",
+    status: "Ready to Build",
+    ownership: "Freehold",
+    isRera: true,
+    khataType: "A Khata",
+    connectivity: {
+      highway: "On Rajpur Road",
+      airport: "45 mins to Jolly Grant",
+    },
+    isNewLaunch: true,
+    lat: 30.3800,
+    lng: 78.0800,
+    description: "Nestled in the foothills of the Himalayas, this 1600 sq.ft plot offers panoramic views of the Mussoorie hills. Perfect for a vacation home or a boutique homestay. Clear titles and immediate registration available.",
+    infrastructure: [
+      { icon: "Droplets", label: "Water", value: "Natural Spring Water" },
+      { icon: "Zap", label: "Power", value: "Smart Grid" },
+      { icon: "Shield", label: "Security", value: "Guarded Community" },
+      { icon: "Trees", label: "Parks", value: "Nature Trails" },
+    ],
+    highlights: [
+      "Stunning views of the Himalayan range",
+      "Environmentally sensitive development",
+      "High growth potential in luxury tourism segment"
+    ],
+    agent: {
+      name: "Vikram Negi",
+      role: "Hill Station Land Expert",
+      image: "/agents/agent1.png",
+      phone: "+91 98XXX XXX33"
+    }
   }
 ];

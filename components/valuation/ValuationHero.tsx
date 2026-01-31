@@ -4,10 +4,31 @@ import { useState } from "react";
 import { Search, Calculator, TrendingUp, ShieldCheck, RefreshCw, Star, ArrowRight, Check, MapPin, ChevronDown, Ruler, Activity } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ValuationData } from "@/app/valuation/page";
+import { Dropdown } from "@/components/ui/Dropdown";
 
 interface Props {
   onCalculate: (data: ValuationData) => void;
 }
+
+const localities = [
+  { label: "HSR Layout, Bangalore", value: "HSR Layout, Bangalore" },
+  { label: "Sarjapur Road, Bangalore", value: "Sarjapur Road, Bangalore" },
+  { label: "Sector 45, Gurgaon", value: "Sector 45, Gurgaon" },
+  { label: "Whitefield, Bangalore", value: "Whitefield, Bangalore" },
+  { label: "Banjara Hills, Hyderabad", value: "Banjara Hills, Hyderabad" },
+  { label: "Rajpur Road, Dehradun", value: "Rajpur Road, Dehradun" },
+];
+
+const facings = [
+  { label: "North", value: "North" },
+  { label: "South", value: "South" },
+  { label: "East", value: "East" },
+  { label: "West", value: "West" },
+  { label: "North-East", value: "North-East" },
+  { label: "North-West", value: "North-West" },
+  { label: "South-East", value: "South-East" },
+  { label: "South-West", value: "South-West" },
+];
 
 export function ValuationHero({ onCalculate }: Props) {
   const [formData, setFormData] = useState<ValuationData>({
@@ -16,30 +37,21 @@ export function ValuationHero({ onCalculate }: Props) {
     facing: "North",
   });
 
-  const localities = [
-    "HSR Layout, Bangalore",
-    "Sarjapur Road, Bangalore",
-    "Sector 45, Gurgaon",
-    "Whitefield, Bangalore",
-    "Banjara Hills, Hyderabad",
-  ];
-
-  const facings = ["North", "South", "East", "West", "North-East", "North-West", "South-East", "South-West"];
-
   return (
     <div className="space-y-0">
       {/* Hero Section */}
-      <section className="relative h-[700px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
+      <section className="relative h-[700px] flex items-center justify-center">
+        {/* Background Wrapper */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <img src="/valuation-bg.png" alt="Aerial land" className="w-full h-full object-cover scale-105" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background" />
+          
+          {/* Decorative Elements inside overflow-hidden */}
+          <div className="absolute top-20 left-10 w-64 h-64 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-verified/10 rounded-full blur-[150px] animate-pulse delay-700" />
         </div>
 
-        {/* Decorative Elements */}
-        <div className="absolute top-20 left-10 w-64 h-64 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-verified/10 rounded-full blur-[150px] animate-pulse delay-700" />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center text-white space-y-12">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center text-white space-y-12 w-full">
           <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in slide-in-from-top-8 duration-1000">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-[10px] font-black tracking-[0.2em] uppercase text-primary-light">
                <TrendingUp className="w-3 h-3" /> Real-time Market Intelligence
@@ -57,68 +69,52 @@ export function ValuationHero({ onCalculate }: Props) {
             </p>
           </div>
 
-          {/* Calculator Card with Floating Effect */}
-          <div className="bg-white/80 backdrop-blur-2xl rounded-[40px] p-6 md:p-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] max-w-5xl mx-auto mt-12 border border-white/50 animate-in fade-in zoom-in-95 duration-1000 delay-300 hover:translate-y-[-8px] transition-transform duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="space-y-3 text-left">
-                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 flex items-center gap-1">
-                   <MapPin className="w-3 h-3" /> City/Locality
-                </label>
-                <div className="relative group">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
-                  <select 
-                    value={formData.locality}
-                    onChange={(e) => setFormData({ ...formData, locality: e.target.value })}
-                    className="w-full h-16 bg-section/40 rounded-2xl border-2 border-transparent pl-11 pr-4 text-sm font-black text-text-primary outline-none focus:border-primary/30 focus:bg-white transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="">Select Locality</option>
-                    {localities.map(l => <option key={l} value={l}>{l}</option>)}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                     <ChevronDown className="w-4 h-4 text-text-muted" />
-                  </div>
-                </div>
+          {/* Calculator Card - Allowed to break out of hero if needed */}
+          <div className="bg-white rounded-[40px] p-4 md:p-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] max-w-6xl mx-auto mt-12 border border-white/50 animate-in fade-in zoom-in-95 duration-1000 delay-300 hover:translate-y-[-8px] transition-transform duration-500">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+              <div className="bg-section/40 rounded-2xl border border-border-subtle hover:border-primary/20 transition-all">
+                <Dropdown 
+                  label="City/Locality"
+                  placeholder="Select Locality"
+                  options={localities}
+                  value={formData.locality}
+                  onChange={(val) => setFormData(prev => ({ ...prev, locality: val }))}
+                  icon={<MapPin className="w-4 h-4" />}
+                />
               </div>
 
-              <div className="space-y-3 text-left">
-                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 flex items-center gap-1">
-                   <Ruler className="w-3 h-3" /> Plot Area (Sq. Ft)
+              <div className="bg-section/40 rounded-2xl border border-border-subtle px-5 py-3 h-full flex flex-col items-start justify-center group hover:border-primary/20 transition-all">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest flex items-center gap-1 mb-0.5">
+                   <Ruler className="w-3 h-3" /> Plot Area
                 </label>
-                <div className="relative group">
+                <div className="relative w-full flex items-center">
                   <input 
                     type="number"
                     placeholder="e.g. 1200"
                     value={formData.area}
                     onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-                    className="w-full h-16 bg-section/40 rounded-2xl border-2 border-transparent px-6 text-sm font-black text-text-primary outline-none focus:border-primary/30 focus:bg-white transition-all"
+                    className="w-full bg-transparent text-sm font-black text-text-primary outline-none"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-text-muted">SQFT</span>
+                  <span className="text-[10px] font-black text-text-muted ml-2">SQFT</span>
                 </div>
               </div>
 
-              <div className="space-y-3 text-left">
-                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 flex items-center gap-1">
-                   <Activity className="w-3 h-3" /> Facing
-                </label>
-                <div className="relative group">
-                  <select 
-                    value={formData.facing}
-                    onChange={(e) => setFormData({ ...formData, facing: e.target.value })}
-                    className="w-full h-16 bg-section/40 rounded-2xl border-2 border-transparent px-6 text-sm font-black text-text-primary outline-none focus:border-primary/30 focus:bg-white transition-all appearance-none cursor-pointer"
-                  >
-                    {facings.map(f => <option key={f} value={f}>{f}</option>)}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                     <ChevronDown className="w-4 h-4 text-text-muted" />
-                  </div>
-                </div>
+              <div className="bg-section/40 rounded-2xl border border-border-subtle hover:border-primary/20 transition-all">
+                <Dropdown 
+                  label="Facing"
+                  placeholder="Select Facing"
+                  options={facings}
+                  value={formData.facing}
+                  onChange={(val) => setFormData(prev => ({ ...prev, facing: val }))}
+                  icon={<Activity className="w-4 h-4" />}
+                />
               </div>
 
-              <div className="flex items-end">
+              <div className="h-full">
                 <Button 
                   onClick={() => onCalculate(formData)}
                   disabled={!formData.locality || !formData.area}
-                  className="w-full h-16 rounded-2xl font-black shadow-[0_20px_40px_-10px_rgba(22,163,74,0.3)] flex items-center justify-center gap-3 text-base group"
+                  className="w-full h-full min-h-[64px] rounded-2xl font-black shadow-[0_20px_40px_-10px_rgba(22,163,74,0.3)] flex items-center justify-center gap-3 text-base group"
                 >
                   <Calculator className="w-5 h-5 group-hover:rotate-12 transition-transform" /> Calculate Value
                 </Button>

@@ -14,6 +14,7 @@ interface AgentProps {
   isVerified?: boolean;
   specialization: string[];
   languages: string[];
+  phone?: string;
 }
 
 export function AgentCard({
@@ -27,7 +28,17 @@ export function AgentCard({
   isVerified = true,
   specialization,
   languages,
+  phone = "+919999999999", // Default placeholder if phone is missing
 }: AgentProps) {
+  const handleCall = () => {
+    window.location.href = `tel:${phone}`;
+  };
+
+  const handleWhatsApp = () => {
+    const message = encodeURIComponent(`Hi ${name}, I saw your profile on IndiaLand and I'm interested in your real estate services.`);
+    window.open(`https://wa.me/${phone.replace(/\+/g, "")}?text=${message}`, "_blank");
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-border-subtle overflow-hidden shadow-sm hover:shadow-lg hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 group flex flex-col h-full relative">
       <div className="p-6 flex flex-col items-center text-center">
@@ -88,11 +99,19 @@ export function AgentCard({
 
         {/* Actions */}
         <div className="flex gap-2 w-full mt-auto">
-          <Button variant="primary" className="flex-1 h-11 rounded-xl text-xs sm:text-sm group-hover:bg-primary-dark transition-colors">
+          <Button 
+            variant="primary" 
+            className="flex-1 h-11 rounded-xl text-xs sm:text-sm group-hover:bg-primary-dark transition-colors"
+            onClick={handleCall}
+          >
             <Phone className="w-4 h-4 mr-2" />
             Call
           </Button>
-          <Button variant="outline" className="flex-1 h-11 rounded-xl text-xs sm:text-sm border-primary/20 text-primary hover:bg-primary-light">
+          <Button 
+            variant="outline" 
+            className="flex-1 h-11 rounded-xl text-xs sm:text-sm border-primary/20 text-primary hover:bg-primary-light"
+            onClick={handleWhatsApp}
+          >
             <MessageSquare className="w-4 h-4 mr-2" />
             WhatsApp
           </Button>
