@@ -2,13 +2,25 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { User, Menu, X, ArrowRight, LogOut } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { User, Menu, X, ArrowRight, LogOut, Circle } from "lucide-react";
 import { Button } from "../ui/Button";
 import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
+  const pathname = usePathname();
+
+  const navLinks = [
+    { name: "Buy Plots", href: "/buy" },
+    { name: "Sell", href: "/sell" },
+    { name: "Land Valuation", href: "/valuation" },
+    { name: "RERA Guide", href: "/rera" },
+    { name: "Legal Services", href: "/legal" },
+    { name: "Stamp Duty Calc", href: "/calculators/stamp-duty" },
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-border-subtle">
@@ -53,24 +65,28 @@ export function Navbar() {
 
         {/* Links - Desktop */}
         <nav className="hidden lg:flex items-center gap-8">
-          <Link href="/buy" className="text-sm font-bold text-text-secondary hover:text-primary transition-colors">
-            Buy Plots
-          </Link>
-          <Link href="/sell" className="text-sm font-bold text-text-secondary hover:text-primary transition-colors">
-            Sell
-          </Link>
-          <Link href="/valuation" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
-            Land Valuation
-          </Link>
-          <Link href="/rera" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
-            RERA Guide
-          </Link>
-          <Link href="/legal" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
-            Legal Services
-          </Link>
-          <Link href="/calculators/stamp-duty" className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors">
-            Stamp Duty Calc
-          </Link>
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link 
+                key={link.href} 
+                href={link.href} 
+                className={cn(
+                  "relative text-sm font-bold transition-all duration-300 pb-1 group",
+                  isActive 
+                    ? "text-primary italic" 
+                    : "text-text-secondary hover:text-primary"
+                )}
+              >
+                {link.name}
+                {/* Underline Indicator */}
+                <span className={cn(
+                  "absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 rounded-full",
+                  isActive ? "w-full" : "w-0 group-hover:w-full"
+                )} />
+              </Link>
+            );
+          })}
         </nav>
 
         {/* CTAs */}
@@ -120,7 +136,10 @@ export function Navbar() {
         <div className="lg:hidden absolute top-20 left-0 w-full bg-white border-b border-border-subtle shadow-xl animate-in slide-in-from-top-4 duration-300 z-50">
           <div className="flex flex-col p-6 gap-4">
             {user && (
-               <Link href="/profile" onClick={() => setIsMenuOpen(false)} className="p-4 bg-section rounded-2xl flex items-center gap-4 mb-2 border border-border-subtle active:border-primary/30 transition-all">
+               <Link href="/profile" onClick={() => setIsMenuOpen(false)} className={cn(
+                 "p-4 rounded-2xl flex items-center gap-4 mb-2 border transition-all",
+                 pathname === "/profile" ? "bg-primary/5 border-primary/20" : "bg-section border-border-subtle"
+               )}>
                  {user.photoURL ? (
                    <img src={user.photoURL} alt="User" className="w-12 h-12 rounded-full border border-primary/20" />
                  ) : (
@@ -135,52 +154,34 @@ export function Navbar() {
                  <ArrowRight className="w-4 h-4 text-text-muted" />
                </Link>
             )}
-            <Link 
-              href="/buy" 
-              className="text-xl font-bold text-text-primary hover:text-primary flex items-center justify-between"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Buy Plots <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link 
-              href="/sell" 
-              className="text-xl font-bold text-text-primary hover:text-primary flex items-center justify-between"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Sell <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link 
-              href="/valuation" 
-              className="text-lg font-semibold text-text-secondary hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Land Valuation
-            </Link>
-            <Link 
-              href="/rera" 
-              className="text-lg font-semibold text-text-secondary hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              RERA Guide
-            </Link>
-            <Link 
-              href="/legal" 
-              className="text-lg font-semibold text-text-secondary hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Legal Services
-            </Link>
-            <Link 
-              href="/calculators/stamp-duty" 
-              className="text-lg font-semibold text-text-secondary hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Stamp Duty Calculator
-            </Link>
+
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link 
+                  key={link.href}
+                  href={link.href} 
+                  className={cn(
+                    "flex items-center justify-between p-2 rounded-xl transition-all",
+                    isActive 
+                      ? "text-primary bg-primary/5 pl-4 border-l-4 border-primary font-black" 
+                      : "text-text-primary font-bold hover:text-primary"
+                  )}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.name} 
+                  <ArrowRight className={cn("w-5 h-5", isActive ? "text-primary" : "text-text-muted")} />
+                </Link>
+              );
+            })}
+
             {!user && (
               <Link 
                 href="/login" 
-                className="text-lg font-bold text-primary"
+                className={cn(
+                  "text-lg font-bold p-2",
+                  pathname === "/login" ? "text-primary" : "text-text-primary"
+                )}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Sign In / Sign Up
@@ -188,7 +189,14 @@ export function Navbar() {
             )}
             <hr className="border-border-subtle my-2" />
             <Link href="/post-property" onClick={() => setIsMenuOpen(false)} className="w-full">
-              <Button variant="primary" className="w-full h-12 rounded-xl font-black">Post Property</Button>
+              <Button 
+                className={cn(
+                  "w-full h-12 rounded-xl font-black",
+                  pathname === "/post-property" && "ring-4 ring-primary/20 shadow-lg shadow-primary/20"
+                )}
+              >
+                Post Property
+              </Button>
             </Link>
           </div>
         </div>

@@ -108,7 +108,7 @@ export default function LegalServicesPage() {
                   <Button 
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full h-20 rounded-[30px] font-black text-lg uppercase tracking-widest bg-primary text-white shadow-3xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    className="w-full py-6 min-h-[80px] rounded-[30px] font-black text-lg uppercase tracking-wider bg-primary text-white shadow-3xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
                     {isSubmitting ? "Processing..." : "Confirm Callback"}
                   </Button>
@@ -150,17 +150,23 @@ export default function LegalServicesPage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
               <Button 
                 onClick={() => {
                   setConsultationStep("form");
                   setIsConsultationOpen(true);
                 }}
-                className="h-16 px-10 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                className="w-full sm:w-auto px-10 py-5 min-h-[64px] rounded-2xl font-black text-sm uppercase tracking-wider shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all text-white bg-primary border-none"
               >
                 Book Consultation
               </Button>
-              <Button variant="outline" className="h-16 px-10 rounded-2xl border-2 border-border-subtle font-black text-sm uppercase tracking-widest hover:border-primary hover:text-primary transition-all">
+              <Button 
+                onClick={() => {
+                  const element = document.getElementById('pricing-section');
+                  element?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="w-full sm:w-auto px-10 py-4 min-h-[64px] rounded-2xl border-2 border-border-subtle font-black text-sm uppercase tracking-wider text-text-primary hover:border-primary hover:text-primary transition-all bg-white shadow-xl shadow-black/5"
+              >
                 View Pricing
               </Button>
             </div>
@@ -226,7 +232,7 @@ export default function LegalServicesPage() {
               <Button 
                 onClick={() => handleSelectPlan('basic')}
                 variant="outline" 
-                className="w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest transition-all group-hover:bg-primary group-hover:text-white group-hover:border-primary"
+                className="w-full py-4 min-h-[56px] rounded-2xl font-black text-xs uppercase tracking-wider transition-all group-hover:bg-primary group-hover:text-white group-hover:border-primary"
               >
                 Book Now
               </Button>
@@ -248,7 +254,7 @@ export default function LegalServicesPage() {
                 </p>
                 <Button 
                   onClick={() => handleSelectPlan('premium')}
-                  className="w-full h-14 bg-white text-[#003B73] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/90"
+                  className="w-full py-4 min-h-[56px] bg-white text-[#003B73] rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/90"
                 >
                   Book Now
                 </Button>
@@ -358,7 +364,7 @@ export default function LegalServicesPage() {
       </section>
 
       {/* Pricing Comparison */}
-      <section className="py-24 bg-[#F4F4F5]">
+      <section id="pricing-section" className="py-24 bg-[#F4F4F5]">
         <div className="max-w-[1440px] mx-auto px-6">
           <div className="text-center space-y-4 mb-20">
             <h2 className="text-4xl md:text-5xl font-black text-text-primary tracking-tighter uppercase italic">Compare Pricing</h2>
@@ -395,7 +401,7 @@ export default function LegalServicesPage() {
               <Button 
                 onClick={() => handleSelectPlan('basic')}
                 variant="outline" 
-                className="w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest border-2"
+                className="w-full py-4 min-h-[56px] rounded-2xl font-black text-xs uppercase tracking-wider border-2"
               >
                 Select Plan
               </Button>
@@ -430,7 +436,7 @@ export default function LegalServicesPage() {
               </div>
               <Button 
                 onClick={() => handleSelectPlan('premium')}
-                className="w-full h-14 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20"
+                className="w-full py-4 min-h-[56px] rounded-2xl font-black text-xs uppercase tracking-wider shadow-xl shadow-primary/20"
               >
                 Get Started
               </Button>
@@ -490,8 +496,8 @@ export default function LegalServicesPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link href="/legal/checkout">
-                <Button className="h-20 px-12 rounded-3xl font-black text-lg bg-white text-[#003B73] shadow-2xl hover:scale-105 active:scale-95 transition-all">
+              <Link href="/legal/checkout" className="w-full sm:w-auto">
+                <Button className="w-full py-6 min-h-[80px] px-12 rounded-3xl font-black text-lg bg-white text-[#003B73] shadow-2xl hover:scale-105 active:scale-95 transition-all border-none">
                   Get Started Now
                 </Button>
               </Link>
@@ -500,8 +506,7 @@ export default function LegalServicesPage() {
                   setConsultationStep("form");
                   setIsConsultationOpen(true);
                 }}
-                variant="outline" 
-                className="h-20 px-12 rounded-3xl font-black text-lg border-2 border-white/20 text-white hover:bg-white/5 transition-all"
+                className="w-full sm:w-auto py-6 min-h-[80px] px-12 rounded-3xl font-black text-lg border-2 border-white/40 text-white bg-transparent hover:bg-white/10 transition-all"
               >
                 Talk to a Lawyer
               </Button>

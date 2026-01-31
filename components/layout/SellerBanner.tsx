@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CheckCircle2, ShieldCheck, FileText, ArrowRight } from "lucide-react";
 import { Button } from "../ui/Button";
 
@@ -22,13 +23,17 @@ export function SellerBanner() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-10 md:mb-0">
-            <Button variant="primary" size="lg" className="w-full sm:w-auto h-14 px-8 rounded-xl font-bold flex items-center gap-2">
-              List Your Plot Now
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 rounded-xl font-bold bg-transparent text-white border-white/20 hover:bg-white/5">
-              Legal Assistance
-            </Button>
+            <Link href="/post-property" className="w-full sm:w-auto">
+              <Button variant="primary" size="lg" className="w-full h-14 px-8 rounded-xl font-bold flex items-center gap-2">
+                List Your Plot Now
+                <ArrowRight className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Link href="/legal" className="w-full sm:w-auto">
+              <Button variant="outline" size="lg" className="w-full h-14 px-8 rounded-xl font-bold bg-transparent text-white border-white/20 hover:bg-white/5">
+                Legal Assistance
+              </Button>
+            </Link>
           </div>
         </div>
 
